@@ -185,7 +185,7 @@ export default function DashboardPage() {
         const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_buyer', { prompt: 'explor' });
         
         if (response.data && Array.isArray(response.data)) {
-          const buyers = response.data;
+          const buyers = response.data.map(item => item.json || item);
           if (buyers.length === 0) {
             setListings([]);
             setListingsLoading(false);
@@ -425,7 +425,7 @@ export default function DashboardPage() {
                                   animate="visible"
                               >
                                   {listings.map((buyer: any, index: number) => (
-                                      <motion.div key={index} variants={itemVariants}>
+                                      <motion.div key={buyer.id || index} variants={itemVariants}>
                                           <Card className="h-full flex flex-col">
                                               <CardHeader>
                                                   <CardTitle className="text-xl">{buyer.Name || 'Unnamed Buyer'}</CardTitle>
@@ -626,5 +626,6 @@ export default function DashboardPage() {
 }
 
     
+
 
 
