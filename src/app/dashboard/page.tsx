@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus } from 'lucide-react';
+import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,9 +18,8 @@ const dashboardCards = [
   {
     icon: Home,
     title: 'For Buyers',
-    description: 'Find your dream home, save favorites, and connect with agents.',
-    href: '#',
-    cta: 'Explore Listings'
+    description: 'Tools and features to help you find the perfect home for your clients.',
+    cta: 'View Buyer Tools'
   },
   {
     icon: Tag,
@@ -31,10 +30,48 @@ const dashboardCards = [
   }
 ];
 
+const buyerTools = [
+  {
+    icon: UserPlus,
+    title: 'Add New Buyers',
+    description: 'Keep track of your clients and their preferences.',
+    href: '#',
+    cta: 'Add Buyer'
+  },
+  {
+    icon: List,
+    title: 'Explore Buyer Listing',
+    description: 'Search for properties that match your buyers\' needs.',
+    href: '#',
+    cta: 'Explore'
+  },
+  {
+    icon: Bot,
+    title: 'AI Chatbot Assistant',
+    description: 'Get instant answers and market insights from our AI.',
+    href: '#',
+    cta: 'Chat Now'
+  },
+  {
+    icon: Building,
+    title: 'Price Based House Prediction',
+    description: 'Use our AI to predict house prices based on features.',
+    href: '#',
+    cta: 'Predict Price'
+  },
+  {
+    icon: DollarSign,
+    title: 'House Basic Price Prediction',
+    description: 'Get a quick valuation for any property.',
+    href: '#',
+    cta: 'Get Estimate'
+  }
+];
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [buyerCardExpanded, setBuyerCardExpanded] = useState(false);
+  const [showBuyerTools, setShowBuyerTools] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -125,9 +162,73 @@ export default function DashboardPage() {
     )
   }
 
+  if (!user) {
+    return (
+      <div className="text-center container py-12 md:py-16">
+        <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
+          Please log in to view your dashboard.
+        </h1>
+        <p className="mt-2 text-lg text-muted-foreground">
+          You need to be logged in to access this page.
+        </p>
+        <Button asChild className="mt-4">
+          <Link href="/login">Login</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-12 md:py-16">
-      {user ? (
+      {showBuyerTools ? (
+        <>
+            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
+                <Button variant="ghost" onClick={() => setShowBuyerTools(false)} className="mb-4">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Dashboard
+                </Button>
+                <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
+                    Buyer Tools
+                </h1>
+                <p className="mt-2 text-lg text-muted-foreground">
+                    Everything you need to assist your buyers effectively.
+                </p>
+            </motion.div>
+            <motion.div
+              className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {buyerTools.map((card) => (
+                <motion.div
+                  key={card.title}
+                  variants={itemVariants}
+                  className="h-full"
+                >
+                  <Card className="h-full flex flex-col">
+                    <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                      <div className="rounded-full bg-primary/10 p-3">
+                        <card.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">{card.title}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                       <CardDescription>{card.description}</CardDescription>
+                    </CardContent>
+                    <CardFooter>
+                        <Button asChild className="w-full">
+                          <Link href={card.href}>{card.cta}</Link>
+                        </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+        </>
+      ) : (
         <>
           <motion.div initial="hidden" animate="visible" variants={itemVariants}>
             <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
@@ -159,9 +260,8 @@ export default function DashboardPage() {
                 key={card.title}
                 variants={itemVariants}
                 className="h-full"
-                onClick={card.title === 'For Buyers' ? () => setBuyerCardExpanded(!buyerCardExpanded) : undefined}
               >
-                <Card className={`h-full flex flex-col ${card.title === 'For Buyers' ? 'cursor-pointer' : ''}`}>
+                <Card className="h-full flex flex-col">
                   <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                     <div className="rounded-full bg-primary/10 p-3">
                       <card.icon className="h-6 w-6 text-primary" />
@@ -171,63 +271,24 @@ export default function DashboardPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex-grow">
-                    {card.title === 'For Buyers' ? (
-                      buyerCardExpanded ? (
-                        <ul className="space-y-4 text-muted-foreground">
-                          <li className="flex items-center gap-3">
-                              <UserPlus className="h-5 w-5 text-primary" />
-                              <span>Add New buyers</span>
-                          </li>
-                          <li className="flex items-center gap-3">
-                              <List className="h-5 w-5 text-primary" />
-                              <span>Explore buyer listing</span>
-                          </li>
-                          <li className="flex items-center gap-3">
-                              <Bot className="h-5 w-5 text-primary" />
-                              <span>AI Chatbot Assistant</span>
-                          </li>
-                          <li className="flex items-center gap-3">
-                              <Building className="h-5 w-5 text-primary" />
-                              <span>Price base house Prediction</span>
-                          </li>
-                          <li className="flex items-center gap-3">
-                              <DollarSign className="h-5 w-5 text-primary" />
-                              <span>House basic price Prediction</span>
-                          </li>
-                        </ul>
-                      ) : (
-                        <CardDescription>{card.description}</CardDescription>
-                      )
-                    ) : (
-                      <CardDescription>
-                          {card.description}
-                      </CardDescription>
-                    )}
+                      <CardDescription>{card.description}</CardDescription>
                   </CardContent>
-                  {card.title === 'For Sellers' && (
-                    <CardFooter>
-                      <Button asChild className="w-full">
-                        <Link href={card.href}>{card.cta}</Link>
-                      </Button>
-                    </CardFooter>
-                  )}
+                  <CardFooter>
+                      {card.title === 'For Buyers' ? (
+                        <Button onClick={() => setShowBuyerTools(true)} className="w-full">
+                            {card.cta}
+                        </Button>
+                      ) : (
+                        <Button asChild className="w-full">
+                            <Link href={card.href!}>{card.cta}</Link>
+                        </Button>
+                      )}
+                  </CardFooter>
                 </Card>
               </motion.div>
             ))}
           </motion.div>
         </>
-      ) : (
-        <div className="text-center">
-          <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
-            Please log in to view your dashboard.
-          </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            You need to be logged in to access this page.
-          </p>
-          <Button asChild className="mt-4">
-            <Link href="/login">Login</Link>
-          </Button>
-        </div>
       )}
     </div>
   );
