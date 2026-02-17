@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,6 +24,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
@@ -40,12 +42,15 @@ export default function LoginPage() {
     try {
       const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/login', data);
       toast({
-        description: response.data?.message || JSON.stringify(response.data, null, 2),
+        description: response.data?.message || "Login successful!",
       });
+      const user = response.data?.user || { name: data.email.split('@')[0], email: data.email };
+      localStorage.setItem('user', JSON.stringify(user));
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
-        description: error.response?.data?.message || (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
+        description: error.response?.data?.message || "An unexpected error occurred.",
       });
     } finally {
       setIsLoading(false);
