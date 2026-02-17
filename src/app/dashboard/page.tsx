@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Home, Tag, User } from 'lucide-react';
+import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -169,15 +169,42 @@ export default function DashboardPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="flex-grow">
-                     <CardDescription>
-                        {card.description}
+                    {card.title === 'For Buyers' ? (
+                      <ul className="space-y-4 text-muted-foreground">
+                        <li className="flex items-center gap-3">
+                            <UserPlus className="h-5 w-5 text-primary" />
+                            <span>Add New buyers</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <List className="h-5 w-5 text-primary" />
+                            <span>Explore buyer listing</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <Bot className="h-5 w-5 text-primary" />
+                            <span>AI Chatbot Assistant</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <Building className="h-5 w-5 text-primary" />
+                            <span>Price base house Prediction</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <DollarSign className="h-5 w-5 text-primary" />
+                            <span>House basic price Prediction</span>
+                        </li>
+                      </ul>
+                    ) : (
+                      <CardDescription>
+                          {card.description}
                       </CardDescription>
+                    )}
                   </CardContent>
-                  <CardFooter>
-                    <Button asChild className="w-full">
-                      <Link href={card.href}>{card.cta}</Link>
-                    </Button>
-                  </CardFooter>
+                  {card.title === 'For Sellers' && (
+                    <CardFooter>
+                      <Button asChild className="w-full">
+                        <Link href={card.href}>{card.cta}</Link>
+                      </Button>
+                    </CardFooter>
+                  )}
                 </Card>
               </motion.div>
             ))}
