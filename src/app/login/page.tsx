@@ -17,6 +17,7 @@ import { Logo } from '@/components/logo';
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
+    username: z.string().min(1, 'Username is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(1, 'Password is required'),
 });
@@ -32,6 +33,7 @@ export default function LoginPage() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: '',
       email: '',
       password: '',
     },
@@ -44,7 +46,7 @@ export default function LoginPage() {
       toast({
         description: response.data?.message || "Login successful!",
       });
-      const user = response.data?.user || { name: data.email.split('@')[0], email: data.email };
+      const user = response.data?.user || { name: data.username, email: data.email };
       const authData = {
         user,
         expiry: Date.now() + 5 * 24 * 60 * 60 * 1000, // 5 days
@@ -81,6 +83,19 @@ export default function LoginPage() {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input placeholder="maxrobinson" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="email"
