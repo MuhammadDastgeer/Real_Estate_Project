@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,36 +17,34 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
     email: z.string().email('Invalid email address'),
-    password: z.string().min(1, 'Password is required'),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
-      password: '',
     },
   });
 
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/login', data);
+      await axios.post('https://n8n-7k47.onrender.com/webhook-test/forgot-password', data);
       toast({
-        title: "Login Successful",
-        description: JSON.stringify(response.data, null, 2),
+        title: "Request Sent",
+        description: "If an account with that email exists, you will receive a password reset link.",
       });
+      form.reset();
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Login Failed",
+        title: "Request Failed",
         description: error.response?.data?.message || error.message || "An unexpected error occurred.",
       });
     } finally {
@@ -62,9 +60,9 @@ export default function LoginPage() {
             <div className='flex justify-center mb-4'>
                 <Logo />
             </div>
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl font-bold">Forgot Your Password?</CardTitle>
             <CardDescription>
-              Enter your credentials to access your account.
+              Enter your email address and we'll send you a link to reset your password.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -83,46 +81,16 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <div className="relative">
-                        <FormControl>
-                          <Input type={showPassword ? "text" : "password"} placeholder="********" {...field} />
-                        </FormControl>
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
-                        >
-                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                        </button>
-                      </div>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Login
+                  Send Reset Link
                 </Button>
               </form>
             </Form>
-             <div className="mt-2 text-right text-sm">
-              <Link
-                href="/forgot-password"
-                className="underline"
-              >
-                Forgot your password?
-              </Link>
-            </div>
-            <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="underline">
-                Sign up
+             <div className="mt-4 text-center text-sm">
+              Remember your password?{' '}
+              <Link href="/login" className="underline">
+                Log in
               </Link>
             </div>
           </CardContent>
