@@ -8,6 +8,7 @@ import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AddBuyerForm } from '@/components/add-buyer-form';
 
 
 interface User {
@@ -55,8 +56,8 @@ const buyerTools = [
     icon: UserPlus,
     title: 'Add New Buyers',
     description: 'Keep track of your clients and their preferences.',
-    actionType: 'link',
-    target: '#',
+    actionType: 'view',
+    target: 'addBuyer',
     cta: 'Add Buyer'
   },
   {
@@ -135,6 +136,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'buyer' | 'seller'>('dashboard');
+  const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer'>('default');
   const router = useRouter();
 
   useEffect(() => {
@@ -247,56 +249,67 @@ export default function DashboardPage() {
         return (
           <>
             <motion.div initial="hidden" animate="visible" variants={itemVariants}>
-                <Button variant="ghost" onClick={() => setActiveView('dashboard')} className="mb-4">
+                <Button variant="ghost" onClick={() => { setActiveView('dashboard'); setBuyerToolView('default'); }} className="mb-4">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Dashboard
                 </Button>
-                <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
-                    Buyer Tools
-                </h1>
-                <p className="mt-2 text-lg text-muted-foreground">
-                    Everything you need to assist your buyers effectively.
-                </p>
+                { buyerToolView === 'default' && (
+                    <>
+                        <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
+                            Buyer Tools
+                        </h1>
+                        <p className="mt-2 text-lg text-muted-foreground">
+                            Everything you need to assist your buyers effectively.
+                        </p>
+                    </>
+                )}
             </motion.div>
-            <motion.div
-              className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {buyerTools.map((card) => (
+            
+            {buyerToolView === 'default' ? (
                 <motion.div
-                  key={card.title}
-                  variants={itemVariants}
-                  className="h-full"
+                className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
                 >
-                  <Card className="h-full flex flex-col">
-                    <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                      <div className="rounded-full bg-primary/10 p-3">
-                        <card.icon className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">{card.title}</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                       <CardDescription>{card.description}</CardDescription>
-                    </CardContent>
-                    <CardFooter>
-                       {card.actionType === 'view' ? (
-                            <Button onClick={() => setActiveView(card.target as any)} className="w-full">
-                                {card.cta}
-                            </Button>
-                        ) : (
-                            <Button asChild className="w-full">
-                                <Link href={card.target as string}>{card.cta}</Link>
-                            </Button>
-                        )}
-                    </CardFooter>
-                  </Card>
+                {buyerTools.map((card) => (
+                    <motion.div
+                    key={card.title}
+                    variants={itemVariants}
+                    className="h-full"
+                    >
+                    <Card className="h-full flex flex-col">
+                        <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                        <div className="rounded-full bg-primary/10 p-3">
+                            <card.icon className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                            <CardTitle className="text-xl">{card.title}</CardTitle>
+                        </div>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                        <CardDescription>{card.description}</CardDescription>
+                        </CardContent>
+                        <CardFooter>
+                        {card.actionType === 'view' ? (
+                                <Button onClick={() => setBuyerToolView(card.target as any)} className="w-full">
+                                    {card.cta}
+                                </Button>
+                            ) : (
+                                <Button asChild className="w-full">
+                                    <Link href={card.target as string}>{card.cta}</Link>
+                                </Button>
+                            )}
+                        </CardFooter>
+                    </Card>
+                    </motion.div>
+                ))}
                 </motion.div>
-              ))}
-            </motion.div>
+            ) : buyerToolView === 'addBuyer' ? (
+                <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
+                     <AddBuyerForm onBack={() => setBuyerToolView('default')} />
+                </motion.div>
+            ) : null}
           </>
         );
       case 'seller':
