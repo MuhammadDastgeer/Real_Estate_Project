@@ -66,10 +66,9 @@ export default function ForgotPasswordPage() {
   async function onEmailSubmit(data: EmailFormData) {
     setIsLoading(true);
     try {
-      await axios.post('https://n8n-7k47.onrender.com/webhook-test/forgot-password', data);
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/forgot-password', data);
       toast({
-        title: "Request Sent",
-        description: "If an account with that email exists, you will receive a password reset code.",
+        description: JSON.stringify(response.data, null, 2),
       });
       setUserEmail(data.email);
       setStep('enter-code');
@@ -77,8 +76,7 @@ export default function ForgotPasswordPage() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Request Failed",
-        description: error.response?.data?.message || error.message || "An unexpected error occurred.",
+        description: (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
       });
     } finally {
       setIsLoading(false);
@@ -88,21 +86,19 @@ export default function ForgotPasswordPage() {
   async function onCodeSubmit(data: CodeFormData) {
     setIsLoading(true);
     try {
-        await axios.post('https://n8n-7k47.onrender.com/webhook-test/verify-reset-code', {
+        const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/verify-reset-code', {
             email: userEmail,
             code: data.code,
         });
         toast({
-            title: "Success",
-            description: "Your code has been verified. You may now reset your password.",
+            description: JSON.stringify(response.data, null, 2),
         });
         setStep('reset-password');
         codeForm.reset();
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Verification Failed",
-            description: error.response?.data?.message || error.message || "Invalid code. Please try again.",
+            description: (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
         });
     } finally {
         setIsLoading(false);
@@ -112,20 +108,18 @@ export default function ForgotPasswordPage() {
   async function onPasswordSubmit(data: PasswordFormData) {
     setIsLoading(true);
     try {
-        await axios.post('https://n8n-7k47.onrender.com/webhook-test/reset-password', {
+        const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/reset-password', {
             email: userEmail,
             password: data.password,
         });
         toast({
-            title: "Password Reset Successful",
-            description: "You can now log in with your new password.",
+            description: JSON.stringify(response.data, null, 2),
         });
         router.push('/login');
     } catch (error: any) {
         toast({
             variant: "destructive",
-            title: "Reset Failed",
-            description: error.response?.data?.message || error.message || "An unexpected error occurred.",
+            description: (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
         });
     } finally {
         setIsLoading(false);
