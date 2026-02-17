@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -427,16 +428,16 @@ export default function DashboardPage() {
                                       <motion.div key={index} variants={itemVariants}>
                                           <Card className="h-full flex flex-col">
                                               <CardHeader>
-                                                  <CardTitle className="text-xl">{buyer.name || 'Unnamed Buyer'}</CardTitle>
-                                                  <CardDescription>{buyer.email || 'No email provided'}</CardDescription>
+                                                  <CardTitle className="text-xl">{buyer.Name || 'Unnamed Buyer'}</CardTitle>
+                                                  <CardDescription>{buyer.Email || 'No email provided'}</CardDescription>
                                               </CardHeader>
                                               <CardContent className="space-y-1 text-sm flex-grow">
-                                                  <p><strong>Phone:</strong> {buyer.phoneNumber || 'N/A'}</p>
-                                                  <p><strong>Location:</strong> {buyer.location || 'N/A'}</p>
-                                                  <p><strong>Price:</strong> {buyer.priceRange || 'N/A'}</p>
-                                                  <p><strong>Type:</strong> {buyer.propertyType || 'N/A'}</p>
-                                                  <p><strong>Area:</strong> {buyer.area || 'N/A'}</p>
-                                                  <p><strong>Status:</strong> {buyer.constructionStatus || 'N/A'}</p>
+                                                  <p><strong>Phone:</strong> {buyer.Phone_Number || 'N/A'}</p>
+                                                  <p><strong>Location:</strong> {buyer.Location_ || 'N/A'}</p>
+                                                  <p><strong>Price:</strong> {buyer.Price_Range || 'N/A'}</p>
+                                                  <p><strong>Type:</strong> {buyer.Property_Type || 'N/A'}</p>
+                                                  <p><strong>Area:</strong> {buyer.Area || 'N/A'}</p>
+                                                  <p><strong>Status:</strong> {buyer.Construction_Status || 'N/A'}</p>
                                               </CardContent>
                                           </Card>
                                       </motion.div>
@@ -625,4 +626,5 @@ export default function DashboardPage() {
 }
 
     
+
 
