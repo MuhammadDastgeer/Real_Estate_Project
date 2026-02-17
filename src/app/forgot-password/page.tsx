@@ -187,7 +187,7 @@ export default function ForgotPasswordPage() {
                   />
                   <Button type="submit" className="w-full" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Send Reset Code
+                    Add Email
                   </Button>
                 </form>
               </Form>
