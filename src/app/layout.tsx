@@ -23,6 +23,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
       </head>
       <body
         className={cn(
@@ -42,6 +43,18 @@ export default function RootLayout({
           </div>
           <Toaster />
         </ThemeProvider>
+        <script
+          id="chat-widget"
+          type="module"
+          dangerouslySetInnerHTML={{
+            __html: `
+              import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
+              createChat({
+                webhookUrl: 'https://n8n-7k47.onrender.com/webhook/bbcdcb38-560e-4b17-a7e8-fb8fa101635f/chat'
+              });
+            `,
+          }}
+        />
       </body>
     </html>
   );
