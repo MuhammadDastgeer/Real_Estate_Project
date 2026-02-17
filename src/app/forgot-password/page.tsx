@@ -15,32 +15,47 @@ import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/logo';
 import { useToast } from "@/hooks/use-toast";
 
-const formSchema = z.object({
+const emailSchema = z.object({
     email: z.string().email('Invalid email address'),
 });
+type EmailFormData = z.infer<typeof emailSchema>;
 
-type FormData = z.infer<typeof formSchema>;
+const codeSchema = z.object({
+    code: z.string().min(4, 'Verification code is required.'),
+});
+type CodeFormData = z.infer<typeof codeSchema>;
 
 export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState<'enter-email' | 'enter-code'>('enter-email');
+  const [userEmail, setUserEmail] = useState('');
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const emailForm = useForm<EmailFormData>({
+    resolver: zodResolver(emailSchema),
     defaultValues: {
       email: '',
     },
   });
 
-  async function onSubmit(data: FormData) {
+  const codeForm = useForm<CodeFormData>({
+    resolver: zodResolver(codeSchema),
+    defaultValues: {
+        code: '',
+    },
+  });
+
+  async function onEmailSubmit(data: EmailFormData) {
     setIsLoading(true);
     try {
       await axios.post('https://n8n-7k47.onrender.com/webhook-test/forgot-password', data);
       toast({
         title: "Request Sent",
-        description: "If an account with that email exists, you will receive a password reset link.",
+        description: "If an account with that email exists, you will receive a password reset code.",
       });
-      form.reset();
+      setUserEmail(data.email);
+      setStep('enter-code');
+      emailForm.reset();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -52,6 +67,30 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  async function onCodeSubmit(data: CodeFormData) {
+    setIsLoading(true);
+    try {
+        const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/verify-reset-code', {
+            email: userEmail,
+            code: data.code,
+        });
+        toast({
+            title: "Success",
+            description: "Your code has been verified. You may now reset your password.",
+        });
+        setStep('enter-email');
+        codeForm.reset();
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Verification Failed",
+            description: error.response?.data?.message || error.message || "Invalid code. Please try again.",
+        });
+    } finally {
+        setIsLoading(false);
+    }
+  }
+
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
       <div>
@@ -60,33 +99,62 @@ export default function ForgotPasswordPage() {
             <div className='flex justify-center mb-4'>
                 <Logo />
             </div>
-            <CardTitle className="text-2xl font-bold">Forgot Your Password?</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+                {step === 'enter-email' ? 'Forgot Your Password?' : 'Enter Verification Code'}
+            </CardTitle>
             <CardDescription>
-              Enter your email address and we'll send you a link to reset your password.
+                {step === 'enter-email' 
+                    ? "Enter your email address and we'll send you a code to reset your password."
+                    : `A code has been sent to ${userEmail}. Please enter it below.`
+                }
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="name@example.com" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Send Reset Link
-                </Button>
-              </form>
-            </Form>
+            {step === 'enter-email' ? (
+              <Form {...emailForm}>
+                <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="grid gap-4">
+                  <FormField
+                    control={emailForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="name@example.com" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Send Reset Code
+                  </Button>
+                </form>
+              </Form>
+            ) : (
+                <Form {...codeForm}>
+                    <form onSubmit={codeForm.handleSubmit(onCodeSubmit)} className="grid gap-4">
+                        <FormField
+                            control={codeForm.control}
+                            name="code"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Verification Code</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="123456" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Verify Code
+                        </Button>
+                    </form>
+                </Form>
+            )}
              <div className="mt-4 text-center text-sm">
               Remember your password?{' '}
               <Link href="/login" className="underline">
