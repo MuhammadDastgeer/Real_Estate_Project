@@ -44,9 +44,15 @@ export function AgentFinder() {
         data
       );
       setResults(response.data);
-      toast({
-        title: "We found some agents for you!",
-      });
+      if (response.data?.recommendedAgents) {
+        toast({
+          title: "We found some agents for you!",
+        });
+      } else {
+         toast({
+          title: "Got a response!",
+        });
+      }
     } catch (error: any) {
       console.error("Error finding agents:", error);
       toast({
@@ -128,59 +134,66 @@ export function AgentFinder() {
           animate="visible"
           variants={containerVariants}
         >
-            <h2 className="text-center font-headline text-3xl font-bold tracking-tight">
-                Recommended Agents
-            </h2>
-          
             {results?.recommendedAgents && Array.isArray(results.recommendedAgents) ? (
-                <motion.div 
-                    className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-                    variants={containerVariants}
-                >
-                    {results.recommendedAgents.map((agent: any, index: number) => {
-                        const agentImage = PlaceHolderImages.find((img) => img.id === `agent-${index + 1}`);
-                        return (
-                            <motion.div key={index} variants={itemVariants}>
-                                <Card className="h-full flex flex-col">
-                                    <CardHeader className="flex-row items-center gap-4">
-                                        <Avatar className="h-16 w-16">
-                                            {agentImage ? (
-                                                <AvatarImage src={agentImage.imageUrl} alt={agent.name} />
-                                            ) : null }
-                                            <AvatarFallback>
-                                                <User className="h-8 w-8" />
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <CardTitle>{agent.name}</CardTitle>
-                                            {agent.specialization && (
-                                                <CardDescription>{agent.specialization}</CardDescription>
-                                            )}
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4 flex-grow">
-                                        {agent.experienceYears && (
-                                            <p className="text-sm">
-                                                <strong>Experience:</strong> {agent.experienceYears} years
-                                            </p>
-                                        )}
-                                        {agent.contactInfo && (
-                                            <p className="text-sm">
-                                                <strong>Contact:</strong> {agent.contactInfo}
-                                            </p>
-                                        )}
-                                        {agent.whyRecommended && (
+                <>
+                    <h2 className="text-center font-headline text-3xl font-bold tracking-tight">
+                        Recommended Agents
+                    </h2>
+                    <motion.div 
+                        className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                        variants={containerVariants}
+                    >
+                        {results.recommendedAgents.map((agent: any, index: number) => {
+                            const agentImage = PlaceHolderImages.find((img) => img.id === `agent-${index + 1}`);
+                            return (
+                                <motion.div key={index} variants={itemVariants}>
+                                    <Card className="h-full flex flex-col">
+                                        <CardHeader className="flex-row items-center gap-4">
+                                            <Avatar className="h-16 w-16">
+                                                {agentImage ? (
+                                                    <AvatarImage src={agentImage.imageUrl} alt={agent.name} />
+                                                ) : null }
+                                                <AvatarFallback>
+                                                    <User className="h-8 w-8" />
+                                                </AvatarFallback>
+                                            </Avatar>
                                             <div>
-                                                <h4 className="font-semibold text-sm">Why we recommend them:</h4>
-                                                <p className="text-sm text-muted-foreground">{agent.whyRecommended}</p>
+                                                <CardTitle>{agent.name}</CardTitle>
+                                                {agent.specialization && (
+                                                    <CardDescription>{agent.specialization}</CardDescription>
+                                                )}
                                             </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        )
-                    })}
-                </motion.div>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4 flex-grow">
+                                            {agent.experienceYears && (
+                                                <p className="text-sm">
+                                                    <strong>Experience:</strong> {agent.experienceYears} years
+                                                </p>
+                                            )}
+                                            {agent.contactInfo && (
+                                                <p className="text-sm">
+                                                    <strong>Contact:</strong> {agent.contactInfo}
+                                                </p>
+                                            )}
+                                            {agent.whyRecommended && (
+                                                <div>
+                                                    <h4 className="font-semibold text-sm">Why we recommend them:</h4>
+                                                    <p className="text-sm text-muted-foreground">{agent.whyRecommended}</p>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </motion.div>
+                            )
+                        })}
+                    </motion.div>
+                </>
+            ) : results?.output && typeof results.output === 'string' ? (
+                <Card className="mt-8">
+                    <CardContent className="p-6">
+                        <p>{results.output}</p>
+                    </CardContent>
+                </Card>
             ) : (
                 <Card className="mt-8">
                     <CardHeader>
