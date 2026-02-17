@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddBuyerForm } from '@/components/add-buyer-form';
+import { AddSellerForm } from '@/components/add-seller-form';
 
 
 interface User {
@@ -99,35 +100,40 @@ const sellerTools = [
     icon: UserPlus,
     title: 'Add Seller',
     description: 'Add a new seller and property to your portfolio.',
-    href: '#',
+    actionType: 'view',
+    target: 'addSeller',
     cta: 'Add Seller'
   },
   {
     icon: Sparkles,
     title: 'AI Price Suggestion',
     description: 'Get an AI-powered price suggestion for your property.',
-    href: '#',
+    actionType: 'link',
+    target: '#',
     cta: 'Get Suggestion'
   },
   {
     icon: List,
     title: 'Explore Seller Listing',
     description: 'Manage and view your current seller listings.',
-    href: '#',
+    actionType: 'link',
+    target: '#',
     cta: 'Explore'
   },
   {
     icon: DollarSign,
     title: 'House Basic Price Prediction',
     description: 'Get a quick valuation for any property.',
-    href: '#',
+    actionType: 'link',
+    target: '#',
     cta: 'Get Estimate'
   },
   {
     icon: Bot,
     title: 'AI Chatbot Assistant',
     description: 'Get instant answers and market insights from our AI.',
-    href: '#',
+    actionType: 'link',
+    target: '#',
     cta: 'Chat Now'
   }
 ];
@@ -137,6 +143,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'buyer' | 'seller'>('dashboard');
   const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer'>('default');
+  const [sellerToolView, setSellerToolView] = useState<'default' | 'addSeller'>('default');
   const router = useRouter();
 
   useEffect(() => {
@@ -248,7 +255,7 @@ export default function DashboardPage() {
       case 'buyer':
         return (
           <>
-            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={itemVariants}>
                 <Button variant="ghost" onClick={() => { setActiveView('dashboard'); setBuyerToolView('default'); }} className="mb-4">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Dashboard
@@ -270,7 +277,8 @@ export default function DashboardPage() {
                 className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
                 variants={containerVariants}
                 initial="hidden"
-                animate="visible"
+                whileInView="visible"
+                viewport={{ once: false }}
                 >
                 {buyerTools.map((card) => (
                     <motion.div
@@ -315,51 +323,68 @@ export default function DashboardPage() {
       case 'seller':
         return (
           <>
-            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
-                <Button variant="ghost" onClick={() => setActiveView('dashboard')} className="mb-4">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={itemVariants}>
+                <Button variant="ghost" onClick={() => { setActiveView('dashboard'); setSellerToolView('default'); }} className="mb-4">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Dashboard
                 </Button>
-                <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
-                    Seller Tools
-                </h1>
-                <p className="mt-2 text-lg text-muted-foreground">
-                    Everything you need to manage your listings and sellers.
-                </p>
+                { sellerToolView === 'default' && (
+                  <>
+                    <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
+                        Seller Tools
+                    </h1>
+                    <p className="mt-2 text-lg text-muted-foreground">
+                        Everything you need to manage your listings and sellers.
+                    </p>
+                  </>
+                )}
             </motion.div>
-            <motion.div
-              className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              {sellerTools.map((card) => (
-                <motion.div
-                  key={card.title}
-                  variants={itemVariants}
-                  className="h-full"
-                >
-                  <Card className="h-full flex flex-col">
-                    <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                      <div className="rounded-full bg-primary/10 p-3">
-                        <card.icon className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl">{card.title}</CardTitle>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="flex-grow">
-                       <CardDescription>{card.description}</CardDescription>
-                    </CardContent>
-                    <CardFooter>
-                        <Button asChild className="w-full">
-                          <Link href={card.href}>{card.cta}</Link>
-                        </Button>
-                    </CardFooter>
-                  </Card>
-                </motion.div>
-              ))}
-            </motion.div>
+            {sellerToolView === 'default' ? (
+              <motion.div
+                className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                variants={containerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: false }}
+              >
+                {sellerTools.map((card) => (
+                  <motion.div
+                    key={card.title}
+                    variants={itemVariants}
+                    className="h-full"
+                  >
+                    <Card className="h-full flex flex-col">
+                      <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                        <div className="rounded-full bg-primary/10 p-3">
+                          <card.icon className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-xl">{card.title}</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="flex-grow">
+                        <CardDescription>{card.description}</CardDescription>
+                      </CardContent>
+                      <CardFooter>
+                        {card.actionType === 'view' ? (
+                          <Button onClick={() => setSellerToolView(card.target as any)} className="w-full">
+                              {card.cta}
+                          </Button>
+                        ) : (
+                          <Button asChild className="w-full">
+                            <Link href={card.target as string}>{card.cta}</Link>
+                          </Button>
+                        )}
+                      </CardFooter>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            ) : sellerToolView === 'addSeller' ? (
+              <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
+                <AddSellerForm onBack={() => setSellerToolView('default')} />
+              </motion.div>
+            ) : null}
           </>
         );
       case 'dashboard':
@@ -368,7 +393,8 @@ export default function DashboardPage() {
           <>
             <motion.div 
                 initial="hidden"
-                animate="visible"
+                whileInView="visible"
+                viewport={{ once: false }}
                 variants={itemVariants}>
               <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
                 Welcome back, {user.name}!
@@ -391,7 +417,8 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2"
               variants={containerVariants}
               initial="hidden"
-              animate="visible"
+              whileInView="visible"
+              viewport={{ once: false }}
             >
               {dashboardCards.map((card) => (
                 <motion.div
