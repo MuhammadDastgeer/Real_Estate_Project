@@ -121,8 +121,8 @@ const sellerTools = [
     icon: List,
     title: 'Explore Seller Listing',
     description: 'Manage and view your current seller listings.',
-    actionType: 'link',
-    target: '#',
+    actionType: 'view',
+    target: 'exploreSellerListing',
     cta: 'Explore'
   },
   {
@@ -148,10 +148,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'buyer' | 'seller'>('dashboard');
   const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer' | 'assistant' | 'exploreBuyerListing'>('default');
-  const [sellerToolView, setSellerToolView] = useState<'default' | 'addSeller' | 'assistant'>('default');
+  const [sellerToolView, setSellerToolView] = useState<'default' | 'addSeller' | 'assistant' | 'exploreSellerListing'>('default');
   const [activeAssistant, setActiveAssistant] = useState<{ title: string; description: string; cta: string; } | null>(null);
   const [listings, setListings] = useState<any[] | null>(null);
   const [listingsLoading, setListingsLoading] = useState(false);
+  const [sellerListings, setSellerListings] = useState<any[] | null>(null);
+  const [sellerListingsLoading, setSellerListingsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -228,6 +230,60 @@ export default function DashboardPage() {
 
     fetchListings();
   }, [buyerToolView, toast]);
+  
+  useEffect(() => {
+    if (sellerToolView !== 'exploreSellerListing') return;
+
+    const fetchSellerListings = async () => {
+      setSellerListingsLoading(true);
+      setSellerListings(null);
+      try {
+        const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_seller', { prompt: 'explor' });
+        
+        if (response.data && Array.isArray(response.data)) {
+          const sellers = response.data.map(item => item.json || item);
+          if (sellers.length === 0) {
+            setSellerListings([]);
+            setSellerListingsLoading(false);
+            toast({ title: "No seller listings found" });
+            return;
+          }
+
+          for (let i = 0; i < sellers.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+            if (i === 0) {
+              setSellerListings([sellers[i]]);
+              setSellerListingsLoading(false);
+            } else {
+              setSellerListings(prev => [...(prev || []), sellers[i]]);
+            }
+          }
+          toast({
+            title: "All seller listings loaded",
+          });
+        } else {
+          setSellerListings([]);
+          setSellerListingsLoading(false);
+          toast({
+            title: "Unexpected format",
+            description: "Could not parse seller listings from the server.",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        setSellerListingsLoading(false);
+        setSellerListings([]);
+        toast({
+          variant: "destructive",
+          title: "Failed to fetch seller listings",
+          description: error.response?.data?.message || "An error occurred.",
+        });
+      }
+    };
+
+    fetchSellerListings();
+  }, [sellerToolView, toast]);
+
 
    const containerVariants = {
     hidden: { opacity: 0 },
@@ -535,6 +591,71 @@ export default function DashboardPage() {
               <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
                 <AddSellerForm onBack={() => setSellerToolView('default')} />
               </motion.div>
+            ) : sellerToolView === 'exploreSellerListing' ? (
+                <motion.div initial="hidden" animate="visible" variants={containerVariants} className="mt-8">
+                    <Card>
+                        <CardHeader>
+                            <div className='flex items-center gap-4'>
+                                <Button variant="ghost" size="icon" onClick={() => setSellerToolView('default')} disabled={sellerListingsLoading}>
+                                    <ArrowLeft />
+                                </Button>
+                                <div>
+                                    <CardTitle>Explore Seller Listings</CardTitle>
+                                    <CardDescription>A list of all potential sellers.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {sellerListingsLoading ? (
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                    {[...Array(3)].map((_, i) => (
+                                        <Card key={i}>
+                                            <CardHeader>
+                                                <Skeleton className="h-6 w-3/4" />
+                                            </CardHeader>
+                                            <CardContent className="space-y-2 pt-4">
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-2/3" />
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-1/2" />
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : sellerListings && sellerListings.length > 0 ? (
+                                <motion.div 
+                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
+                                    {sellerListings.map((seller: any, index: number) => (
+                                        <motion.div key={seller.id || index} variants={itemVariants}>
+                                            <Card className="h-full flex flex-col">
+                                                <CardHeader>
+                                                    <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
+                                                    <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
+                                                </CardHeader>
+                                                <CardContent className="space-y-1 text-sm flex-grow">
+                                                    <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
+                                                    <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
+                                                    <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
+                                                    <p><strong>Type:</strong> {seller.Property_Type || 'N/A'}</p>
+                                                    <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
+                                                    <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            ) : (
+                                <div className="text-center py-12 text-muted-foreground">
+                                    No seller listings found or there was an error loading them.
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
             ) : sellerToolView === 'assistant' && activeAssistant ? (
                 <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
                     <AIToolForm 
@@ -626,6 +747,7 @@ export default function DashboardPage() {
 }
 
     
+
 
 
 
