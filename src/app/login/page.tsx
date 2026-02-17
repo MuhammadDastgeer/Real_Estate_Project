@@ -45,7 +45,15 @@ export default function LoginPage() {
         description: response.data?.message || "Login successful!",
       });
       const user = response.data?.user || { name: data.email.split('@')[0], email: data.email };
-      localStorage.setItem('user', JSON.stringify(user));
+      const authData = {
+        user,
+        expiry: Date.now() + 5 * 24 * 60 * 60 * 1000, // 5 days
+      };
+      localStorage.setItem('auth', JSON.stringify(authData));
+      
+      // Manually trigger a storage event to update the header
+      window.dispatchEvent(new Event("storage"));
+
       router.push('/dashboard');
     } catch (error: any) {
       toast({

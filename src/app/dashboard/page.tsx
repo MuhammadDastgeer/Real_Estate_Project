@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Home, Tag, User } from 'lucide-react';
@@ -33,19 +34,27 @@ const dashboardCards = [
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
+    const authDataString = localStorage.getItem('auth');
+    if (authDataString) {
       try {
-        setUser(JSON.parse(userData));
+        const authData = JSON.parse(authDataString);
+        if (authData.expiry && authData.expiry > Date.now()) {
+          setUser(authData.user);
+        } else {
+          localStorage.removeItem('auth');
+          setUser(null);
+          router.push('/login');
+        }
       } catch (e) {
-        console.error("Failed to parse user data from localStorage", e)
+        console.error("Failed to parse auth data from localStorage", e)
         setUser(null)
       }
     }
     setLoading(false);
-  }, []);
+  }, [router]);
 
    const containerVariants = {
     hidden: { opacity: 0 },

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -17,17 +18,56 @@ const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
 ];
 
+interface User {
+  name: string;
+}
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [isScrolled, setIsScrolled] = React.useState(false);
+  const [user, setUser] = React.useState<User | null>(null);
+  const router = useRouter();
 
   React.useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
+
+    const checkUser = () => {
+      const authDataString = localStorage.getItem('auth');
+      if (authDataString) {
+        try {
+          const authData = JSON.parse(authDataString);
+          if (authData.expiry && authData.expiry > Date.now()) {
+            setUser(authData.user);
+          } else {
+            localStorage.removeItem('auth');
+            setUser(null);
+          }
+        } catch (error) {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+    
+    checkUser();
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('storage', checkUser); // Listen for changes in other tabs
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('storage', checkUser);
+    }
   }, []);
+  
+  const handleLogout = () => {
+    localStorage.removeItem('auth');
+    setUser(null);
+    setIsMenuOpen(false);
+    router.push('/login');
+  }
 
   return (
     <header
@@ -71,12 +111,18 @@ export default function Header() {
         </nav>
         <div className="ml-auto hidden items-center gap-2 md:flex">
           <ThemeToggle />
-          <Button variant="ghost" asChild>
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Sign Up</Link>
-          </Button>
+          {user ? (
+             <Button variant="ghost" onClick={handleLogout}>Logout</Button>
+          ) : (
+            <>
+              <Button variant="ghost" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
       {isMenuOpen && (
@@ -96,12 +142,18 @@ export default function Header() {
             ))}
             <div className="mt-4 flex items-center gap-2 border-t pt-4">
               <ThemeToggle />
-              <Button variant="ghost" asChild className="w-full">
-                <Link href="/login">Login</Link>
-              </Button>
-              <Button asChild className="w-full">
-                <Link href="/signup">Sign Up</Link>
-              </Button>
+              { user ? (
+                <Button variant="ghost" onClick={handleLogout} className="w-full">Logout</Button>
+              ) : (
+                <>
+                  <Button variant="ghost" asChild className="w-full">
+                    <Link href="/login" onClick={() => setIsMenuOpen(false)}>Login</Link>
+                  </Button>
+                  <Button asChild className="w-full">
+                    <Link href="/signup" onClick={() => setIsMenuOpen(false)}>Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
