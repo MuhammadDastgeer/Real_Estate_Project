@@ -50,7 +50,13 @@ export default function RootLayout({
               import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
 
               createChat({
-                webhookUrl: 'https://n8n-7k47.onrender.com/webhook-test/Connect_with_Agent'
+                webhookUrl: 'https://n8n-7k47.onrender.com/webhook-test/Connect_with_Agent',
+                theme: {
+                  chatButton: {
+                    backgroundColor: '#3F51B5',
+                    iconColor: '#FFFFFF'
+                  }
+                }
               });
             `,
           }}
