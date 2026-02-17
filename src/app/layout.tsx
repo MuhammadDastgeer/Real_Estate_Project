@@ -49,7 +49,7 @@ export default function RootLayout({
             (async () => {
               const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js');
               createChat({
-                webhookUrl: 'https://n8n-7k47.onrender.com/webhook-test/Connect_with_Agent',
+                webhookUrl: 'https://n8n-7k47.onrender.com/webhook/Connect_with_Agent',
                 theme: {
                   chatButton: {
                     backgroundColor: '#3F51B5',
