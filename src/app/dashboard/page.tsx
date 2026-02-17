@@ -1,8 +1,10 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, Sparkles } from 'lucide-react';
 import Link from 'next/link';
@@ -11,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AddBuyerForm } from '@/components/add-buyer-form';
 import { AddSellerForm } from '@/components/add-seller-form';
 import { AIToolForm } from '@/components/ai-tool-form';
+import { useToast } from '@/hooks/use-toast';
 
 
 interface User {
@@ -66,8 +69,8 @@ const buyerTools = [
     icon: List,
     title: 'Explore Buyer Listing',
     description: 'Search for properties that match your buyers\' needs.',
-    actionType: 'link',
-    target: '#',
+    actionType: 'view',
+    target: 'exploreBuyerListing',
     cta: 'Explore'
   },
   {
@@ -143,10 +146,13 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'buyer' | 'seller'>('dashboard');
-  const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer' | 'assistant'>('default');
+  const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer' | 'assistant' | 'exploreBuyerListing'>('default');
   const [sellerToolView, setSellerToolView] = useState<'default' | 'addSeller' | 'assistant'>('default');
   const [activeAssistant, setActiveAssistant] = useState<{ title: string; description: string; cta: string; } | null>(null);
+  const [listings, setListings] = useState<any[] | null>(null);
+  const [listingsLoading, setListingsLoading] = useState(false);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     const authDataString = localStorage.getItem('auth');
@@ -167,6 +173,43 @@ export default function DashboardPage() {
     }
     setLoading(false);
   }, [router]);
+
+  useEffect(() => {
+    if (buyerToolView !== 'exploreBuyerListing') return;
+
+    const fetchListings = async () => {
+      setListingsLoading(true);
+      setListings(null);
+      try {
+        const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_buyer', { prompt: 'explor' });
+        
+        if (response.data && Array.isArray(response.data)) {
+          setListings(response.data);
+          toast({
+            title: response.data.length > 0 ? "Listings loaded" : "No listings found",
+          });
+        } else {
+          setListings([]);
+          toast({
+            title: "Unexpected format",
+            description: "Could not parse listings from the server.",
+            variant: "destructive",
+          });
+        }
+      } catch (error: any) {
+        setListings([]);
+        toast({
+          variant: "destructive",
+          title: "Failed to fetch listings",
+          description: error.response?.data?.message || "An error occurred.",
+        });
+      } finally {
+        setListingsLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [buyerToolView, toast]);
 
    const containerVariants = {
     hidden: { opacity: 0 },
@@ -325,6 +368,71 @@ export default function DashboardPage() {
                 <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
                      <AddBuyerForm onBack={() => setBuyerToolView('default')} />
                 </motion.div>
+            ) : buyerToolView === 'exploreBuyerListing' ? (
+              <motion.div initial="hidden" animate="visible" variants={containerVariants} className="mt-8">
+                  <Card>
+                      <CardHeader>
+                          <div className='flex items-center gap-4'>
+                              <Button variant="ghost" size="icon" onClick={() => setBuyerToolView('default')} disabled={listingsLoading}>
+                                  <ArrowLeft />
+                              </Button>
+                              <div>
+                                  <CardTitle>Explore Buyer Listings</CardTitle>
+                                  <CardDescription>A list of all potential buyers.</CardDescription>
+                              </div>
+                          </div>
+                      </CardHeader>
+                      <CardContent>
+                          {listingsLoading ? (
+                              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                  {[...Array(3)].map((_, i) => (
+                                      <Card key={i}>
+                                          <CardHeader>
+                                              <Skeleton className="h-6 w-3/4" />
+                                          </CardHeader>
+                                          <CardContent className="space-y-2 pt-4">
+                                              <Skeleton className="h-4 w-full" />
+                                              <Skeleton className="h-4 w-2/3" />
+                                              <Skeleton className="h-4 w-full" />
+                                              <Skeleton className="h-4 w-1/2" />
+                                          </CardContent>
+                                      </Card>
+                                  ))}
+                              </div>
+                          ) : listings && listings.length > 0 ? (
+                              <motion.div 
+                                  className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                                  variants={containerVariants}
+                                  initial="hidden"
+                                  animate="visible"
+                              >
+                                  {listings.map((buyer: any, index: number) => (
+                                      <motion.div key={index} variants={itemVariants}>
+                                          <Card className="h-full flex flex-col">
+                                              <CardHeader>
+                                                  <CardTitle className="text-xl">{buyer.name || 'Unnamed Buyer'}</CardTitle>
+                                                  <CardDescription>{buyer.email || 'No email provided'}</CardDescription>
+                                              </CardHeader>
+                                              <CardContent className="space-y-1 text-sm flex-grow">
+                                                  <p><strong>Phone:</strong> {buyer.phoneNumber || 'N/A'}</p>
+                                                  <p><strong>Location:</strong> {buyer.location || 'N/A'}</p>
+                                                  <p><strong>Price:</strong> {buyer.priceRange || 'N/A'}</p>
+                                                  <p><strong>Type:</strong> {buyer.propertyType || 'N/A'}</p>
+                                                  <p><strong>Area:</strong> {buyer.area || 'N/A'}</p>
+                                                  <p><strong>Status:</strong> {buyer.constructionStatus || 'N/A'}</p>
+                                              </CardContent>
+                                          </Card>
+                                      </motion.div>
+                                  ))}
+                              </motion.div>
+                          ) : (
+                              <div className="text-center py-12 text-muted-foreground">
+                                  No buyer listings found or there was an error loading them.
+                              </div>
+                          )}
+                      </CardContent>
+                  </Card>
+              </motion.div>
             ) : buyerToolView === 'assistant' && activeAssistant ? (
               <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
                 <AIToolForm 
@@ -498,3 +606,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
