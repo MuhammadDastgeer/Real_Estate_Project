@@ -1,18 +1,11 @@
 "use client";
 
-import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/logo';
-
-// Metadata is defined but will not be used in a client component.
-export const metadata: Metadata = {
-  title: 'Login - Estately',
-  description: 'Log in to your Estately account.',
-};
 
 export default function LoginPage() {
   return (

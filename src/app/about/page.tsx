@@ -1,18 +1,10 @@
 "use client";
 
-import { Metadata } from 'next';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, Target, Users } from 'lucide-react';
-
-// Metadata is defined but will not be used in a client component.
-// For SEO, this should be handled in a parent layout or a server component.
-export const metadata: Metadata = {
-  title: 'About Estately',
-  description: 'Learn about Estately, our mission, and our commitment to revolutionizing the real estate industry.',
-};
 
 const values = [
     {

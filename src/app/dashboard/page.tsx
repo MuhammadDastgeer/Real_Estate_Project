@@ -1,16 +1,9 @@
 "use client";
 
-import { Metadata } from 'next';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Search, Heart, Users, ShieldCheck, TrendingUp, LineChart } from 'lucide-react';
 import Link from 'next/link';
-
-// Metadata is defined but will not be used in a client component.
-export const metadata: Metadata = {
-  title: 'Dashboard - Estately',
-  description: 'Your personal dashboard for managing your real estate activities on Estately.',
-};
 
 const dashboardCards = [
   {

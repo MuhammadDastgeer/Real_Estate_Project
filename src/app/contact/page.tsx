@@ -1,18 +1,11 @@
 "use client";
 
-import { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, MapPin, Phone } from 'lucide-react';
-
-// Metadata is defined but will not be used in a client component.
-export const metadata: Metadata = {
-  title: 'Contact Us - Estately',
-  description: 'Get in touch with the Estately team. We are here to help you with your real estate needs.',
-};
 
 export default function ContactPage() {
   return (
