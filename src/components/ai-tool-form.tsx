@@ -13,11 +13,16 @@ import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-const formSchema = z.object({
+// Schema for single prompt input
+const promptSchema = z.object({
   prompt: z.string().min(1, 'This field is required.'),
 });
 
-type FormData = z.infer<typeof formSchema>;
+// Schema for House Basic Price Prediction
+const housePriceSchema = z.object({
+    area: z.string().min(1, 'Area is required.'),
+    location: z.string().min(1, 'Location is required.'),
+});
 
 interface AIToolFormProps {
     title: string;
@@ -30,21 +35,25 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
   const [result, setResult] = useState<any | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      prompt: '',
-    },
+  const isHousePricePrediction = title === 'House Basic Price Prediction';
+
+  const form = useForm({
+    resolver: zodResolver(isHousePricePrediction ? housePriceSchema : promptSchema),
+    defaultValues: isHousePricePrediction 
+      ? { area: '', location: '' } 
+      : { prompt: '' },
   });
 
-  const getPlaceholder = () => {
+  const getPlaceholder = (fieldName?: string) => {
+    if (isHousePricePrediction) {
+        if (fieldName === 'area') return 'e.g., 1200 sq ft';
+        if (fieldName === 'location') return 'e.g., Anytown, USA';
+    }
     switch (title) {
         case 'AI Chatbot Assistant':
             return 'Ask anything about the real estate market...';
         case 'Price Based House Prediction':
             return 'e.g., 800000';
-        case 'House Basic Price Prediction':
-            return 'e.g., 123 Main St, Anytown, USA';
         case 'AI Price Suggestion':
             return 'e.g., 1500';
         default:
@@ -62,7 +71,7 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = async (data) => {
+  const onSubmit: SubmitHandler<any> = async (data) => {
     setIsLoading(true);
     setResult(null);
     try {
@@ -100,19 +109,51 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="prompt"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Your query</FormLabel>
-                    <FormControl>
-                      <Input placeholder={getPlaceholder()} type={getInputType()} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {isHousePricePrediction ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="area"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Area (sq ft / marla / kanal)</FormLabel>
+                        <FormControl>
+                          <Input placeholder={getPlaceholder('area')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location (City, Area, Society)</FormLabel>
+                        <FormControl>
+                          <Input placeholder={getPlaceholder('location')} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="prompt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Your query</FormLabel>
+                      <FormControl>
+                        <Input placeholder={getPlaceholder()} type={getInputType()} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Get AI Response
