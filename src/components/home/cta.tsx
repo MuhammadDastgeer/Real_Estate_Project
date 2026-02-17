@@ -1,13 +1,30 @@
 "use client";
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function Cta() {
+  const cardVariants = {
+    hidden: { scale: 0.9, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  };
+
   return (
     <section className="py-20 sm:py-32 bg-background">
       <div className="container mx-auto px-4">
-        <div>
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+          variants={cardVariants}
+        >
         <Card className="bg-primary text-primary-foreground text-center shadow-2xl overflow-hidden">
             <div className="relative">
                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-90"></div>
@@ -26,7 +43,7 @@ export default function Cta() {
                 </div>
             </div>
         </Card>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

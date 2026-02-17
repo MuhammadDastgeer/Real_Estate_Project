@@ -1,6 +1,7 @@
 "use client";
 
 import { Metadata } from 'next';
+import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Search, Heart, Users, ShieldCheck, TrendingUp, LineChart } from 'lucide-react';
 import Link from 'next/link';
@@ -51,6 +52,24 @@ const dashboardCards = [
 ];
 
 export default function DashboardPage() {
+   const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+    },
+  };
+
   return (
     <div className="container py-12 md:py-16">
       <div>
@@ -62,12 +81,16 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div
+      <motion.div
         className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
         {dashboardCards.map((card, index) => (
-          <div
+          <motion.div
             key={card.title}
+            variants={itemVariants}
           >
             <Link href={card.href} passHref>
               <Card className="h-full transform-gpu transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/50 cursor-pointer">
@@ -82,9 +105,9 @@ export default function DashboardPage() {
                 </CardHeader>
               </Card>
             </Link>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

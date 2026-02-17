@@ -1,4 +1,5 @@
 "use client";
+import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +27,17 @@ const steps = [
 ]
 
 export default function HowItWorks() {
+    const itemVariants = (isOdd: boolean) => ({
+      hidden: { x: isOdd ? 100 : -100, opacity: 0 },
+      visible: {
+        x: 0,
+        opacity: 1,
+        transition: {
+          duration: 0.6,
+        },
+      },
+    });
+
     return (
         <section className="py-20 sm:py-32 bg-card">
             <div className="container mx-auto px-4">
@@ -42,12 +54,16 @@ export default function HowItWorks() {
                     <div className="absolute left-1/2 top-0 bottom-0 w-px bg-border -translate-x-1/2 hidden md:block"></div>
                     
                     {steps.map((step, index) => (
-                        <div
+                        <motion.div
                             key={step.step}
                             className={cn(
                                 "relative flex flex-col md:flex-row items-center gap-8 mb-16 last:mb-0",
                                 index % 2 !== 0 && "md:flex-row-reverse"
                             )}
+                             initial="hidden"
+                             whileInView="visible"
+                             viewport={{ once: true, amount: 0.5 }}
+                             variants={itemVariants(index % 2 !== 0)}
                         >
                             <div className="flex-1">
                                 <Badge variant="secondary" className="mb-2">Step {step.step}</Badge>
@@ -58,7 +74,7 @@ export default function HowItWorks() {
                                 {step.step}
                             </div>
                             <div className="flex-1 hidden md:block"></div>
-                        </div>
+                        </motion.div>
                     ))}
                 </div>
             </div>

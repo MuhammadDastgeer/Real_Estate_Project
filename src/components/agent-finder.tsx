@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { motion } from "framer-motion";
 
 import {
   agentMatchingRecommendation,
@@ -67,6 +68,27 @@ export function AgentFinder() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+      },
+    },
   };
 
   return (
@@ -149,58 +171,63 @@ export function AgentFinder() {
       </Card>
 
       {results && (
-        <div
+        <motion.div
           className="mt-12"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
         >
           <h2 className="text-center font-headline text-3xl font-bold tracking-tight">
             Your Recommended Agents
           </h2>
           <div className="mt-8 grid gap-8 md:grid-cols-1">
             {results.recommendedAgents.map((agent, index) => (
-              <Card key={index} className="flex flex-col md:flex-row overflow-hidden shadow-md transition-shadow hover:shadow-xl">
-                <div className="flex-shrink-0 p-6 flex items-center justify-center">
-                  {agentImages[index] && (
-                       <Image
-                          src={agentImages[index]?.imageUrl || ''}
-                          alt={`Portrait of ${agent.name}`}
-                          data-ai-hint={agentImages[index]?.imageHint}
-                          width={100}
-                          height={100}
-                          className="rounded-full object-cover border-4 border-muted"
-                      />
-                  )}
-                </div>
-                <div className="p-6 border-t md:border-t-0 md:border-l flex-grow">
-                  <CardTitle className="text-2xl">{agent.name}</CardTitle>
-                  <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                          <Briefcase className="h-4 w-4 text-primary" />
-                          <span>{agent.specialization}</span>
-                      </div>
-                      {agent.experienceYears && (
-                           <div className="flex items-center gap-1.5">
-                              <Star className="h-4 w-4 text-primary" />
-                              <span>{agent.experienceYears} years experience</span>
-                          </div>
-                      )}
+              <motion.div key={index} variants={itemVariants}>
+                <Card className="flex flex-col md:flex-row overflow-hidden shadow-md transition-shadow hover:shadow-xl">
+                  <div className="flex-shrink-0 p-6 flex items-center justify-center">
+                    {agentImages[index] && (
+                         <Image
+                            src={agentImages[index]?.imageUrl || ''}
+                            alt={`Portrait of ${agent.name}`}
+                            data-ai-hint={agentImages[index]?.imageHint}
+                            width={100}
+                            height={100}
+                            className="rounded-full object-cover border-4 border-muted"
+                        />
+                    )}
                   </div>
-                  <CardDescription className="mt-4 text-base">
-                      <strong className="text-foreground flex items-center gap-2 mb-1">
-                          <UserCheck className="h-5 w-5 text-primary" /> Why they're a great match:
-                      </strong>
-                      {agent.whyRecommended}
-                  </CardDescription>
-                  <div className="mt-4 flex flex-col sm:flex-row gap-2 text-sm">
-                       <Button className="w-full sm:w-auto">Contact {agent.name.split(' ')[0]}</Button>
-                       <p className="text-muted-foreground text-center sm:text-left self-center">
-                          Contact info: {agent.contactInfo}
-                       </p>
+                  <div className="p-6 border-t md:border-t-0 md:border-l flex-grow">
+                    <CardTitle className="text-2xl">{agent.name}</CardTitle>
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                            <Briefcase className="h-4 w-4 text-primary" />
+                            <span>{agent.specialization}</span>
+                        </div>
+                        {agent.experienceYears && (
+                             <div className="flex items-center gap-1.5">
+                                <Star className="h-4 w-4 text-primary" />
+                                <span>{agent.experienceYears} years experience</span>
+                            </div>
+                        )}
+                    </div>
+                    <CardDescription className="mt-4 text-base">
+                        <strong className="text-foreground flex items-center gap-2 mb-1">
+                            <UserCheck className="h-5 w-5 text-primary" /> Why they're a great match:
+                        </strong>
+                        {agent.whyRecommended}
+                    </CardDescription>
+                    <div className="mt-4 flex flex-col sm:flex-row gap-2 text-sm">
+                         <Button className="w-full sm:w-auto">Contact {agent.name.split(' ')[0]}</Button>
+                         <p className="text-muted-foreground text-center sm:text-left self-center">
+                            Contact info: {agent.contactInfo}
+                         </p>
+                    </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
     </div>
   );
