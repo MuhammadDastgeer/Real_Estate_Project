@@ -363,8 +363,7 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2"
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.3 }}
+              animate="visible"
             >
               {dashboardCards.map((card) => (
                 <motion.div
