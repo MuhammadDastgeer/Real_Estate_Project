@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
@@ -78,9 +78,8 @@ export function AgentFinder() {
                   <FormItem>
                     <FormLabel>Your Request</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Input 
                         placeholder="e.g., 'I'm looking for a 3-bedroom house in San Francisco with a budget of $1.5M. I need a backyard for my dog.'"
-                        rows={4}
                         {...field}
                       />
                     </FormControl>
