@@ -42,13 +42,23 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
         case 'AI Chatbot Assistant':
             return 'Ask anything about the real estate market...';
         case 'Price Based House Prediction':
-            return 'e.g., 3 beds, 2 baths, 1500 sqft, sunnyvale';
+            return 'e.g., 800000';
         case 'House Basic Price Prediction':
             return 'e.g., 123 Main St, Anytown, USA';
         case 'AI Price Suggestion':
-            return 'e.g., 4-bed, 3-bath, modern kitchen, great view';
+            return 'e.g., 1500';
         default:
             return 'Enter your query here...';
+    }
+  };
+
+  const getInputType = () => {
+    switch (title) {
+        case 'Price Based House Prediction':
+        case 'AI Price Suggestion':
+            return 'number';
+        default:
+            return 'text';
     }
   };
 
@@ -97,7 +107,7 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
                   <FormItem>
                     <FormLabel>Your query</FormLabel>
                     <FormControl>
-                      <Input placeholder={getPlaceholder()} {...field} />
+                      <Input placeholder={getPlaceholder()} type={getInputType()} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
