@@ -255,7 +255,7 @@ export default function DashboardPage() {
       case 'buyer':
         return (
           <>
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={itemVariants}>
+            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
                 <Button variant="ghost" onClick={() => { setActiveView('dashboard'); setBuyerToolView('default'); }} className="mb-4">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Dashboard
@@ -277,8 +277,7 @@ export default function DashboardPage() {
                 className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
                 variants={containerVariants}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: false }}
+                animate="visible"
                 >
                 {buyerTools.map((card) => (
                     <motion.div
@@ -323,7 +322,7 @@ export default function DashboardPage() {
       case 'seller':
         return (
           <>
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: false }} variants={itemVariants}>
+            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
                 <Button variant="ghost" onClick={() => { setActiveView('dashboard'); setSellerToolView('default'); }} className="mb-4">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Dashboard
@@ -344,8 +343,7 @@ export default function DashboardPage() {
                 className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
                 variants={containerVariants}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: false }}
+                animate="visible"
               >
                 {sellerTools.map((card) => (
                   <motion.div
@@ -393,8 +391,7 @@ export default function DashboardPage() {
           <>
             <motion.div 
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: false }}
+                animate="visible"
                 variants={itemVariants}>
               <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
                 Welcome back, {user.name}!
@@ -417,8 +414,7 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2"
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={{ once: false }}
+              animate="visible"
             >
               {dashboardCards.map((card) => (
                 <motion.div
