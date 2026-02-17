@@ -54,7 +54,7 @@ const buyerTools = [
     icon: UserPlus,
     title: 'Add New Buyers',
     description: 'Keep track of your clients and their preferences.',
-    href: '#',
+    href: '/dashboard/add-buyer',
     cta: 'Add Buyer'
   },
   {
@@ -168,6 +168,8 @@ export default function DashboardPage() {
       opacity: 1,
     },
   };
+  
+  const viewportConfig = { once: false, amount: 0.3 };
 
   if (loading) {
     return (
@@ -256,7 +258,8 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
               variants={containerVariants}
               initial="hidden"
-              animate="visible"
+              whileInView="visible"
+              viewport={viewportConfig}
             >
               {buyerTools.map((card) => (
                 <motion.div
@@ -306,7 +309,8 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
               variants={containerVariants}
               initial="hidden"
-              animate="visible"
+              whileInView="visible"
+              viewport={viewportConfig}
             >
               {sellerTools.map((card) => (
                 <motion.div
@@ -341,7 +345,11 @@ export default function DashboardPage() {
       default:
         return (
           <>
-            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
+            <motion.div 
+                initial="hidden"
+                whileInView="visible"
+                viewport={viewportConfig}
+                variants={itemVariants}>
               <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
                 Welcome back, {user.name}!
               </h1>
@@ -363,7 +371,8 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2"
               variants={containerVariants}
               initial="hidden"
-              animate="visible"
+              whileInView="visible"
+              viewport={viewportConfig}
             >
               {dashboardCards.map((card) => (
                 <motion.div
@@ -409,5 +418,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
