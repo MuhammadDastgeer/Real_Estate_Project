@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
-  prompt: z.string().min(10, "Please describe your needs in more detail."),
+  prompt: z.string().min(2, "Please describe your needs in more detail."),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -37,7 +37,7 @@ export function AgentFinder() {
     setIsLoading(true);
     setResults(null);
     try {
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/Connect_with_Agent', data);
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/connect-with-agent', data);
       setResults(response.data);
     } catch (error: any) {
       console.error("Error finding agents:", error);
