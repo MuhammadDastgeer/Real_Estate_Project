@@ -184,12 +184,30 @@ export default function DashboardPage() {
         const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_buyer', { prompt: 'explor' });
         
         if (response.data && Array.isArray(response.data)) {
-          setListings(response.data);
+          const buyers = response.data;
+          if (buyers.length === 0) {
+            setListings([]);
+            setListingsLoading(false);
+            toast({ title: "No listings found" });
+            return;
+          }
+
+          // Loop and add buyers one by one for a staggered effect
+          for (let i = 0; i < buyers.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 300)); // Delay for effect
+            if (i === 0) {
+              setListings([buyers[i]]); // On first buyer, create the array
+              setListingsLoading(false); // And stop showing the main loader
+            } else {
+              setListings(prev => [...(prev || []), buyers[i]]); // Add subsequent buyers
+            }
+          }
           toast({
-            title: response.data.length > 0 ? "Listings loaded" : "No listings found",
+            title: "All listings loaded",
           });
         } else {
           setListings([]);
+          setListingsLoading(false);
           toast({
             title: "Unexpected format",
             description: "Could not parse listings from the server.",
@@ -197,14 +215,13 @@ export default function DashboardPage() {
           });
         }
       } catch (error: any) {
+        setListingsLoading(false);
         setListings([]);
         toast({
           variant: "destructive",
           title: "Failed to fetch listings",
           description: error.response?.data?.message || "An error occurred.",
         });
-      } finally {
-        setListingsLoading(false);
       }
     };
 
@@ -608,3 +625,4 @@ export default function DashboardPage() {
 }
 
     
+
