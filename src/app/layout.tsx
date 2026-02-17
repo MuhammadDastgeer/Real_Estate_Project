@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -43,12 +44,10 @@ export default function RootLayout({
           </div>
           <Toaster />
         </ThemeProvider>
-        <script
-          type="module"
-          dangerouslySetInnerHTML={{
-            __html: `
-              import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
-
+        <Script id="n8n-chat-init" strategy="afterInteractive">
+          {`
+            (async () => {
+              const { createChat } = await import('https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js');
               createChat({
                 webhookUrl: 'https://n8n-7k47.onrender.com/webhook-test/Connect_with_Agent',
                 theme: {
@@ -58,9 +57,9 @@ export default function RootLayout({
                   }
                 }
               });
-            `,
-          }}
-        />
+            })();
+          `}
+        </Script>
       </body>
     </html>
   );
