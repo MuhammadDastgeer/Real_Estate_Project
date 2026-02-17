@@ -34,6 +34,7 @@ const dashboardCards = [
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [buyerCardExpanded, setBuyerCardExpanded] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -158,8 +159,9 @@ export default function DashboardPage() {
                 key={card.title}
                 variants={itemVariants}
                 className="h-full"
+                onClick={card.title === 'For Buyers' ? () => setBuyerCardExpanded(!buyerCardExpanded) : undefined}
               >
-                <Card className="h-full flex flex-col">
+                <Card className={`h-full flex flex-col ${card.title === 'For Buyers' ? 'cursor-pointer' : ''}`}>
                   <CardHeader className="flex flex-row items-center gap-4 space-y-0">
                     <div className="rounded-full bg-primary/10 p-3">
                       <card.icon className="h-6 w-6 text-primary" />
@@ -170,28 +172,32 @@ export default function DashboardPage() {
                   </CardHeader>
                   <CardContent className="flex-grow">
                     {card.title === 'For Buyers' ? (
-                      <ul className="space-y-4 text-muted-foreground">
-                        <li className="flex items-center gap-3">
-                            <UserPlus className="h-5 w-5 text-primary" />
-                            <span>Add New buyers</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <List className="h-5 w-5 text-primary" />
-                            <span>Explore buyer listing</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <Bot className="h-5 w-5 text-primary" />
-                            <span>AI Chatbot Assistant</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <Building className="h-5 w-5 text-primary" />
-                            <span>Price base house Prediction</span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                            <DollarSign className="h-5 w-5 text-primary" />
-                            <span>House basic price Prediction</span>
-                        </li>
-                      </ul>
+                      buyerCardExpanded ? (
+                        <ul className="space-y-4 text-muted-foreground">
+                          <li className="flex items-center gap-3">
+                              <UserPlus className="h-5 w-5 text-primary" />
+                              <span>Add New buyers</span>
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <List className="h-5 w-5 text-primary" />
+                              <span>Explore buyer listing</span>
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <Bot className="h-5 w-5 text-primary" />
+                              <span>AI Chatbot Assistant</span>
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <Building className="h-5 w-5 text-primary" />
+                              <span>Price base house Prediction</span>
+                          </li>
+                          <li className="flex items-center gap-3">
+                              <DollarSign className="h-5 w-5 text-primary" />
+                              <span>House basic price Prediction</span>
+                          </li>
+                        </ul>
+                      ) : (
+                        <CardDescription>{card.description}</CardDescription>
+                      )
                     ) : (
                       <CardDescription>
                           {card.description}
