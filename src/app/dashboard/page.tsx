@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft } from 'lucide-react';
+import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,8 +25,7 @@ const dashboardCards = [
     icon: Tag,
     title: 'For Sellers',
     description: 'List your property, get market insights, and manage offers.',
-    href: '#',
-    cta: 'List Your Property'
+    cta: 'View Seller Tools'
   }
 ];
 
@@ -68,10 +67,48 @@ const buyerTools = [
   }
 ];
 
+const sellerTools = [
+  {
+    icon: UserPlus,
+    title: 'Add Seller',
+    description: 'Add a new seller and property to your portfolio.',
+    href: '#',
+    cta: 'Add Seller'
+  },
+  {
+    icon: Sparkles,
+    title: 'AI Price Suggestion',
+    description: 'Get an AI-powered price suggestion for your property.',
+    href: '#',
+    cta: 'Get Suggestion'
+  },
+  {
+    icon: List,
+    title: 'Explore Seller Listing',
+    description: 'Manage and view your current seller listings.',
+    href: '#',
+    cta: 'Explore'
+  },
+  {
+    icon: DollarSign,
+    title: 'House Basic Price Prediction',
+    description: 'Get a quick valuation for any property.',
+    href: '#',
+    cta: 'Get Estimate'
+  },
+  {
+    icon: Bot,
+    title: 'AI Chatbot Assistant',
+    description: 'Get instant answers and market insights from our AI.',
+    href: '#',
+    cta: 'Chat Now'
+  }
+];
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showBuyerTools, setShowBuyerTools] = useState(false);
+  const [activeView, setActiveView] = useState<'dashboard' | 'buyer' | 'seller'>('dashboard');
   const router = useRouter();
 
   useEffect(() => {
@@ -178,12 +215,13 @@ export default function DashboardPage() {
     );
   }
 
-  return (
-    <div className="container py-12 md:py-16">
-      {showBuyerTools ? (
-        <>
+  const renderContent = () => {
+    switch (activeView) {
+      case 'buyer':
+        return (
+          <>
             <motion.div initial="hidden" animate="visible" variants={itemVariants}>
-                <Button variant="ghost" onClick={() => setShowBuyerTools(false)} className="mb-4">
+                <Button variant="ghost" onClick={() => setActiveView('dashboard')} className="mb-4">
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Dashboard
                 </Button>
@@ -227,69 +265,122 @@ export default function DashboardPage() {
                 </motion.div>
               ))}
             </motion.div>
-        </>
-      ) : (
-        <>
-          <motion.div initial="hidden" animate="visible" variants={itemVariants}>
-            <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
-              Welcome back, {user.name}!
-            </h1>
-            <p className="mt-2 text-lg text-muted-foreground">
-              We're glad to see you again. Here's your personalized dashboard to manage your real estate journey.
-            </p>
-            <Card className="mt-6">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><User className="text-primary" /> Your Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p><strong>Username:</strong> {user.name}</p>
-                    <p><strong>Email:</strong> {user.email}</p>
-                </CardContent>
-            </Card>
-          </motion.div>
-
-          <motion.div
-            className="mt-8 grid gap-6 sm:grid-cols-2"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            {dashboardCards.map((card) => (
-              <motion.div
-                key={card.title}
-                variants={itemVariants}
-                className="h-full"
-              >
-                <Card className="h-full flex flex-col">
-                  <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                    <div className="rounded-full bg-primary/10 p-3">
-                      <card.icon className="h-6 w-6 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-xl">{card.title}</CardTitle>
-                    </div>
+          </>
+        );
+      case 'seller':
+        return (
+          <>
+            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
+                <Button variant="ghost" onClick={() => setActiveView('dashboard')} className="mb-4">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Back to Dashboard
+                </Button>
+                <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
+                    Seller Tools
+                </h1>
+                <p className="mt-2 text-lg text-muted-foreground">
+                    Everything you need to manage your listings and sellers.
+                </p>
+            </motion.div>
+            <motion.div
+              className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              {sellerTools.map((card) => (
+                <motion.div
+                  key={card.title}
+                  variants={itemVariants}
+                  className="h-full"
+                >
+                  <Card className="h-full flex flex-col">
+                    <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                      <div className="rounded-full bg-primary/10 p-3">
+                        <card.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">{card.title}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                       <CardDescription>{card.description}</CardDescription>
+                    </CardContent>
+                    <CardFooter>
+                        <Button asChild className="w-full">
+                          <Link href={card.href}>{card.cta}</Link>
+                        </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          </>
+        );
+      case 'dashboard':
+      default:
+        return (
+          <>
+            <motion.div initial="hidden" animate="visible" variants={itemVariants}>
+              <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
+                Welcome back, {user.name}!
+              </h1>
+              <p className="mt-2 text-lg text-muted-foreground">
+                We're glad to see you again. Here's your personalized dashboard to manage your real estate journey.
+              </p>
+              <Card className="mt-6">
+                  <CardHeader>
+                      <CardTitle className="flex items-center gap-2"><User className="text-primary" /> Your Information</CardTitle>
                   </CardHeader>
-                  <CardContent className="flex-grow">
-                      <CardDescription>{card.description}</CardDescription>
+                  <CardContent>
+                      <p><strong>Username:</strong> {user.name}</p>
+                      <p><strong>Email:</strong> {user.email}</p>
                   </CardContent>
-                  <CardFooter>
-                      {card.title === 'For Buyers' ? (
-                        <Button onClick={() => setShowBuyerTools(true)} className="w-full">
+              </Card>
+            </motion.div>
+  
+            <motion.div
+              className="mt-8 grid gap-6 sm:grid-cols-2"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              {dashboardCards.map((card, index) => (
+                <motion.div
+                  key={card.title}
+                  variants={itemVariants}
+                  className="h-full"
+                >
+                  <Card className="h-full flex flex-col">
+                    <CardHeader className="flex flex-row items-center gap-4 space-y-0">
+                      <div className="rounded-full bg-primary/10 p-3">
+                        <card.icon className="h-6 w-6 text-primary" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl">{card.title}</CardTitle>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                        <CardDescription>{card.description}</CardDescription>
+                    </CardContent>
+                    <CardFooter>
+                        <Button onClick={() => setActiveView(index === 0 ? 'buyer' : 'seller')} className="w-full">
                             {card.cta}
                         </Button>
-                      ) : (
-                        <Button asChild className="w-full">
-                            <Link href={card.href!}>{card.cta}</Link>
-                        </Button>
-                      )}
-                  </CardFooter>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        </>
-      )}
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              ))}
+            </motion.div>
+          </>
+        );
+    }
+  };
+
+  return (
+    <div className="container py-12 md:py-16">
+      {renderContent()}
     </div>
   );
 }
