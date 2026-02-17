@@ -37,6 +37,21 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
     },
   });
 
+  const getPlaceholder = () => {
+    switch (title) {
+        case 'AI Chatbot Assistant':
+            return 'Ask anything about the real estate market...';
+        case 'Price Based House Prediction':
+            return 'e.g., 3 beds, 2 baths, 1500 sqft, sunnyvale';
+        case 'House Basic Price Prediction':
+            return 'e.g., 123 Main St, Anytown, USA';
+        case 'AI Price Suggestion':
+            return 'e.g., 4-bed, 3-bath, modern kitchen, great view';
+        default:
+            return 'Enter your query here...';
+    }
+  };
+
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     setIsLoading(true);
     setResult(null);
@@ -82,7 +97,7 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
                   <FormItem>
                     <FormLabel>Your query</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your query here..." {...field} />
+                      <Input placeholder={getPlaceholder()} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
