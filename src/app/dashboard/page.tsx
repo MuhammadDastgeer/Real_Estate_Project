@@ -19,14 +19,34 @@ const dashboardCards = [
     icon: Home,
     title: 'For Buyers',
     description: 'Tools and features to help you find the perfect home for your clients.',
-    cta: 'View Buyer Tools'
+    cta: 'View Buyer Tools',
+    actionType: 'view',
+    target: 'buyer'
   },
   {
     icon: Tag,
     title: 'For Sellers',
     description: 'List your property, get market insights, and manage offers.',
-    cta: 'View Seller Tools'
-  }
+    cta: 'View Seller Tools',
+    actionType: 'view',
+    target: 'seller'
+  },
+  {
+    icon: List,
+    title: 'Buyer Listing',
+    description: 'View and manage all your buyer listings.',
+    cta: 'View Listings',
+    actionType: 'link',
+    target: '#',
+  },
+  {
+    icon: Building,
+    title: 'Seller Listing',
+    description: 'View and manage all your seller listings.',
+    cta: 'View Listings',
+    actionType: 'link',
+    target: '#',
+  },
 ];
 
 const buyerTools = [
@@ -346,7 +366,7 @@ export default function DashboardPage() {
               whileInView="visible"
               viewport={{ once: true, amount: 0.3 }}
             >
-              {dashboardCards.map((card, index) => (
+              {dashboardCards.map((card) => (
                 <motion.div
                   key={card.title}
                   variants={itemVariants}
@@ -365,9 +385,15 @@ export default function DashboardPage() {
                         <CardDescription>{card.description}</CardDescription>
                     </CardContent>
                     <CardFooter>
-                        <Button onClick={() => setActiveView(index === 0 ? 'buyer' : 'seller')} className="w-full">
-                            {card.cta}
-                        </Button>
+                       {card.actionType === 'view' ? (
+                            <Button onClick={() => setActiveView(card.target as 'dashboard' | 'buyer' | 'seller')} className="w-full">
+                                {card.cta}
+                            </Button>
+                        ) : (
+                            <Button asChild className="w-full">
+                                <Link href={card.target as string}>{card.cta}</Link>
+                            </Button>
+                        )}
                     </CardFooter>
                   </Card>
                 </motion.div>
@@ -384,3 +410,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
