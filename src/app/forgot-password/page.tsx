@@ -68,7 +68,7 @@ export default function ForgotPasswordPage() {
     try {
       const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/forgot-password', data);
       toast({
-        description: JSON.stringify(response.data, null, 2),
+        description: response.data?.message || JSON.stringify(response.data, null, 2),
       });
       setUserEmail(data.email);
       setStep('enter-code');
@@ -76,7 +76,7 @@ export default function ForgotPasswordPage() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        description: (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
+        description: error.response?.data?.message || (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
       });
     } finally {
       setIsLoading(false);
@@ -91,14 +91,14 @@ export default function ForgotPasswordPage() {
             code: data.code,
         });
         toast({
-            description: JSON.stringify(response.data, null, 2),
+            description: response.data?.message || JSON.stringify(response.data, null, 2),
         });
         setStep('reset-password');
         codeForm.reset();
     } catch (error: any) {
         toast({
             variant: "destructive",
-            description: (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
+            description: error.response?.data?.message || (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
         });
     } finally {
         setIsLoading(false);
@@ -113,13 +113,13 @@ export default function ForgotPasswordPage() {
             password: data.password,
         });
         toast({
-            description: JSON.stringify(response.data, null, 2),
+            description: response.data?.message || JSON.stringify(response.data, null, 2),
         });
         router.push('/login');
     } catch (error: any) {
         toast({
             variant: "destructive",
-            description: (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
+            description: error.response?.data?.message || (error.response?.data && JSON.stringify(error.response.data, null, 2)) || error.message || "An unexpected error occurred.",
         });
     } finally {
         setIsLoading(false);
