@@ -175,8 +175,6 @@ export default function DashboardPage() {
     },
   };
   
-  const viewportConfig = { once: false, amount: 0.3 };
-
   if (loading) {
     return (
       <div className="container py-12 md:py-16">
@@ -264,8 +262,7 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={viewportConfig}
+              animate="visible"
             >
               {buyerTools.map((card) => (
                 <motion.div
@@ -321,8 +318,7 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={viewportConfig}
+              animate="visible"
             >
               {sellerTools.map((card) => (
                 <motion.div
@@ -359,8 +355,7 @@ export default function DashboardPage() {
           <>
             <motion.div 
                 initial="hidden"
-                whileInView="visible"
-                viewport={viewportConfig}
+                animate="visible"
                 variants={itemVariants}>
               <h1 className="font-headline text-3xl font-bold tracking-tight md:text-4xl">
                 Welcome back, {user.name}!
@@ -383,8 +378,7 @@ export default function DashboardPage() {
               className="mt-8 grid gap-6 sm:grid-cols-2"
               variants={containerVariants}
               initial="hidden"
-              whileInView="visible"
-              viewport={viewportConfig}
+              animate="visible"
             >
               {dashboardCards.map((card) => (
                 <motion.div
@@ -430,5 +424,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
