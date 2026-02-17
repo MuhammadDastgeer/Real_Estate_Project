@@ -1,15 +1,19 @@
 "use client";
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import axios from 'axios';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Logo } from '@/components/logo';
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
     firstName: z.string().min(1, 'First name is required'),
@@ -26,6 +30,11 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function SignupPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { toast } = useToast();
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,10 +46,24 @@ export default function SignupPage() {
     },
   });
 
-  function onSubmit(data: FormData) {
-    console.log("Form submitted with data:", data);
-    // Here you would typically handle the signup logic,
-    // e.g., making an API call to your backend.
+  async function onSubmit(data: FormData) {
+    setIsLoading(true);
+    try {
+      const { confirmPassword, ...postData } = data;
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/signup', postData);
+      toast({
+        title: "Signup Successful",
+        description: JSON.stringify(response.data, null, 2),
+      });
+    } catch (error: any) {
+        toast({
+            variant: "destructive",
+            title: "Signup Failed",
+            description: error.response?.data?.message || error.message || "An unexpected error occurred.",
+        });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -106,9 +129,18 @@ export default function SignupPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="********" {...field} />
-                      </FormControl>
+                       <div className="relative">
+                        <FormControl>
+                          <Input type={showPassword ? "text" : "password"} placeholder="********" {...field} />
+                        </FormControl>
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                        >
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -119,14 +151,24 @@ export default function SignupPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="********" {...field} />
-                      </FormControl>
+                       <div className="relative">
+                        <FormControl>
+                          <Input type={showConfirmPassword ? "text" : "password"} placeholder="********" {...field} />
+                        </FormControl>
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground"
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Create Account
                 </Button>
               </form>
