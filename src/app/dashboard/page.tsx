@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddBuyerForm } from '@/components/add-buyer-form';
 import { AddSellerForm } from '@/components/add-seller-form';
+import { AIToolForm } from '@/components/ai-tool-form';
 
 
 interface User {
@@ -73,7 +74,7 @@ const buyerTools = [
     icon: Bot,
     title: 'AI Chatbot Assistant',
     description: 'Get instant answers and market insights from our AI.',
-    actionType: 'link',
+    actionType: 'assistant',
     target: '#',
     cta: 'Chat Now'
   },
@@ -81,7 +82,7 @@ const buyerTools = [
     icon: Building,
     title: 'Price Based House Prediction',
     description: 'Use our AI to predict house prices based on features.',
-    actionType: 'link',
+    actionType: 'assistant',
     target: '#',
     cta: 'Predict Price'
   },
@@ -89,7 +90,7 @@ const buyerTools = [
     icon: DollarSign,
     title: 'House Basic Price Prediction',
     description: 'Get a quick valuation for any property.',
-    actionType: 'link',
+    actionType: 'assistant',
     target: '#',
     cta: 'Get Estimate'
   }
@@ -108,7 +109,7 @@ const sellerTools = [
     icon: Sparkles,
     title: 'AI Price Suggestion',
     description: 'Get an AI-powered price suggestion for your property.',
-    actionType: 'link',
+    actionType: 'assistant',
     target: '#',
     cta: 'Get Suggestion'
   },
@@ -124,7 +125,7 @@ const sellerTools = [
     icon: DollarSign,
     title: 'House Basic Price Prediction',
     description: 'Get a quick valuation for any property.',
-    actionType: 'link',
+    actionType: 'assistant',
     target: '#',
     cta: 'Get Estimate'
   },
@@ -132,7 +133,7 @@ const sellerTools = [
     icon: Bot,
     title: 'AI Chatbot Assistant',
     description: 'Get instant answers and market insights from our AI.',
-    actionType: 'link',
+    actionType: 'assistant',
     target: '#',
     cta: 'Chat Now'
   }
@@ -142,8 +143,9 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'buyer' | 'seller'>('dashboard');
-  const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer'>('default');
-  const [sellerToolView, setSellerToolView] = useState<'default' | 'addSeller'>('default');
+  const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer' | 'assistant'>('default');
+  const [sellerToolView, setSellerToolView] = useState<'default' | 'addSeller' | 'assistant'>('default');
+  const [activeAssistant, setActiveAssistant] = useState<{ title: string; description: string; cta: string; } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -299,14 +301,21 @@ export default function DashboardPage() {
                         </CardContent>
                         <CardFooter>
                         {card.actionType === 'view' ? (
-                                <Button onClick={() => setBuyerToolView(card.target as any)} className="w-full">
-                                    {card.cta}
-                                </Button>
-                            ) : (
-                                <Button asChild className="w-full">
-                                    <Link href={card.target as string}>{card.cta}</Link>
-                                </Button>
-                            )}
+                            <Button onClick={() => setBuyerToolView(card.target as any)} className="w-full">
+                                {card.cta}
+                            </Button>
+                        ) : card.actionType === 'assistant' ? (
+                            <Button onClick={() => {
+                                setActiveAssistant(card as any);
+                                setBuyerToolView('assistant');
+                            }} className="w-full">
+                                {card.cta}
+                            </Button>
+                        ) : (
+                            <Button asChild className="w-full">
+                                <Link href={card.target as string}>{card.cta}</Link>
+                            </Button>
+                        )}
                         </CardFooter>
                     </Card>
                     </motion.div>
@@ -316,6 +325,17 @@ export default function DashboardPage() {
                 <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
                      <AddBuyerForm onBack={() => setBuyerToolView('default')} />
                 </motion.div>
+            ) : buyerToolView === 'assistant' && activeAssistant ? (
+              <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
+                <AIToolForm 
+                    title={activeAssistant.title}
+                    description={activeAssistant.description}
+                    onBack={() => {
+                        setBuyerToolView('default');
+                        setActiveAssistant(null);
+                    }}
+                />
+              </motion.div>
             ) : null}
           </>
         );
@@ -365,13 +385,20 @@ export default function DashboardPage() {
                       </CardContent>
                       <CardFooter>
                         {card.actionType === 'view' ? (
-                          <Button onClick={() => setSellerToolView(card.target as any)} className="w-full">
-                              {card.cta}
-                          </Button>
+                            <Button onClick={() => setSellerToolView(card.target as any)} className="w-full">
+                                {card.cta}
+                            </Button>
+                        ) : card.actionType === 'assistant' ? (
+                            <Button onClick={() => {
+                                setActiveAssistant(card as any);
+                                setSellerToolView('assistant');
+                            }} className="w-full">
+                                {card.cta}
+                            </Button>
                         ) : (
-                          <Button asChild className="w-full">
-                            <Link href={card.target as string}>{card.cta}</Link>
-                          </Button>
+                            <Button asChild className="w-full">
+                                <Link href={card.target as string}>{card.cta}</Link>
+                            </Button>
                         )}
                       </CardFooter>
                     </Card>
@@ -382,6 +409,17 @@ export default function DashboardPage() {
               <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
                 <AddSellerForm onBack={() => setSellerToolView('default')} />
               </motion.div>
+            ) : sellerToolView === 'assistant' && activeAssistant ? (
+                <motion.div initial="hidden" animate="visible" variants={itemVariants} className="mt-8">
+                    <AIToolForm 
+                        title={activeAssistant.title}
+                        description={activeAssistant.description}
+                        onBack={() => {
+                            setSellerToolView('default');
+                            setActiveAssistant(null);
+                        }}
+                    />
+                </motion.div>
             ) : null}
           </>
         );
