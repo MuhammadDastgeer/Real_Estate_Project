@@ -5,7 +5,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
-import axios from "axios";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -37,13 +36,17 @@ export function AgentFinder() {
     setIsLoading(true);
     setResults(null);
     try {
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook/Connect_with_Agent', data);
-      setResults(response.data);
+      // Simulate a network request
+      await new Promise(resolve => setTimeout(resolve, 500));
+      toast({
+        title: "Functionality Disabled",
+        description: "The webhook for connecting with an agent has been removed.",
+      });
     } catch (error: any) {
       console.error("Error finding agents:", error);
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to find agents. Please try again later.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
