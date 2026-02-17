@@ -38,7 +38,7 @@ export function AgentFinder() {
     setResults(null);
     try {
       const response = await axios.post(
-        "https://n8n-7k47.onrender.com/webhook/bbcdcb38-560e-4b17-a7e8-fb8fa101635f/chat",
+        "https://n8n-7k47.onrender.com/webhook-test/chatbot",
         data
       );
       setResults(response.data);
