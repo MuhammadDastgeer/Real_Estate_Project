@@ -46,7 +46,7 @@ export default function LoginPage() {
       toast({
         description: response.data?.message || "Login successful!",
       });
-      const user = response.data?.user || { name: data.username, email: data.email };
+      const user = { name: data.username, email: data.email };
       const authData = {
         user,
         expiry: Date.now() + 5 * 24 * 60 * 60 * 1000, // 5 days

@@ -140,7 +140,7 @@ export default function DashboardPage() {
                     <CardTitle className="flex items-center gap-2"><User className="text-primary" /> Your Information</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p><strong>Name:</strong> {user.name}</p>
+                    <p><strong>Username:</strong> {user.name}</p>
                     <p><strong>Email:</strong> {user.email}</p>
                 </CardContent>
             </Card>
