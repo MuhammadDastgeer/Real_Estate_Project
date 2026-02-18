@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
@@ -1103,12 +1101,3 @@ const filteredSellerListings = useMemo(() => {
     </div>
   );
 }
-
-    
-
-
-
-
-
-
-
