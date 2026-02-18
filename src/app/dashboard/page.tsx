@@ -2,12 +2,12 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, Sparkles } from 'lucide-react';
+import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, Sparkles, FilterX } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,6 +15,9 @@ import { AddBuyerForm } from '@/components/add-buyer-form';
 import { AddSellerForm } from '@/components/add-seller-form';
 import { AIToolForm } from '@/components/ai-tool-form';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 
 interface User {
@@ -143,6 +146,10 @@ const sellerTools = [
   }
 ];
 
+const propertyTypes = ['House', 'Flat', 'Plot', 'Commercial'];
+const constructionStatuses = ['Ready to move', 'Under construction'];
+
+
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -157,6 +164,26 @@ export default function DashboardPage() {
   const [sellerListingsLoading, setSellerListingsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+
+  const [buyerFilters, setBuyerFilters] = useState({ location: '', price: '', type: '', area: '', status: '' });
+  const [sellerFilters, setSellerFilters] = useState({ location: '', price: '', type: '', area: '', status: '' });
+
+  const handleBuyerFilterChange = (filterName: string, value: string) => {
+    setBuyerFilters(prev => ({ ...prev, [filterName]: value }));
+  };
+
+  const clearBuyerFilters = () => {
+    setBuyerFilters({ location: '', price: '', type: '', area: '', status: '' });
+  };
+  
+  const handleSellerFilterChange = (filterName: string, value: string) => {
+    setSellerFilters(prev => ({ ...prev, [filterName]: value }));
+  };
+
+  const clearSellerFilters = () => {
+    setSellerFilters({ location: '', price: '', type: '', area: '', status: '' });
+  };
+
 
   useEffect(() => {
     const authDataString = localStorage.getItem('auth');
@@ -396,6 +423,30 @@ useEffect(() => {
 
     fetchSellerListings();
 }, [dashboardView, toast]);
+
+const filteredBuyerListings = useMemo(() => {
+    if (!listings) return null;
+    return listings.filter(buyer => {
+        const locationMatch = !buyerFilters.location || buyer.Location_?.toLowerCase().includes(buyerFilters.location.toLowerCase());
+        const priceMatch = !buyerFilters.price || buyer.Price_Range?.toLowerCase().includes(buyerFilters.price.toLowerCase());
+        const typeMatch = !buyerFilters.type || buyer.Property_Type === buyerFilters.type;
+        const areaMatch = !buyerFilters.area || buyer.Area?.toLowerCase().includes(buyerFilters.area.toLowerCase());
+        const statusMatch = !buyerFilters.status || buyer.Construction_Status === buyerFilters.status;
+        return locationMatch && priceMatch && typeMatch && areaMatch && statusMatch;
+    });
+}, [listings, buyerFilters]);
+
+const filteredSellerListings = useMemo(() => {
+    if (!sellerListings) return null;
+    return sellerListings.filter(seller => {
+        const locationMatch = !sellerFilters.location || seller.Location_?.toLowerCase().includes(sellerFilters.location.toLowerCase());
+        const priceMatch = !sellerFilters.price || seller.Price_Range?.toLowerCase().includes(sellerFilters.price.toLowerCase());
+        const typeMatch = !sellerFilters.type || seller.Property_Type === sellerFilters.type;
+        const areaMatch = !sellerFilters.area || seller.Area?.toLowerCase().includes(sellerFilters.area.toLowerCase());
+        const statusMatch = !sellerFilters.status || seller.Construction_Status === sellerFilters.status;
+        return locationMatch && priceMatch && typeMatch && areaMatch && statusMatch;
+    });
+}, [sellerListings, sellerFilters]);
 
 
    const containerVariants = {
@@ -790,19 +841,47 @@ useEffect(() => {
                 <motion.div initial="hidden" animate="visible" variants={containerVariants}>
                     <Card>
                         <CardHeader>
-                            <div className='flex items-center gap-4'>
-                                <Button variant="ghost" size="icon" onClick={() => setDashboardView('default')} disabled={listingsLoading}>
-                                    <ArrowLeft />
-                                </Button>
-                                <div>
-                                    <CardTitle>Buyer Listings</CardTitle>
-                                    <CardDescription>A list of all potential buyers.</CardDescription>
+                            <div className='flex items-center justify-between'>
+                                <div className='flex items-center gap-4'>
+                                    <Button variant="ghost" size="icon" onClick={() => setDashboardView('default')} disabled={listingsLoading}>
+                                        <ArrowLeft />
+                                    </Button>
+                                    <div>
+                                        <CardTitle>Buyer Listings</CardTitle>
+                                        <CardDescription>A list of all potential buyers.</CardDescription>
+                                    </div>
                                 </div>
                             </div>
                         </CardHeader>
+                        <CardContent className='border-b pb-6'>
+                            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end'>
+                                <div className="space-y-2"><Label>Location</Label><Input placeholder="e.g. Multan" value={buyerFilters.location} onChange={(e) => handleBuyerFilterChange('location', e.target.value)} /></div>
+                                <div className="space-y-2"><Label>Price</Label><Input placeholder="e.g. 500" value={buyerFilters.price} onChange={(e) => handleBuyerFilterChange('price', e.target.value)} /></div>
+                                <div className="space-y-2"><Label>Type</Label>
+                                    <Select value={buyerFilters.type} onValueChange={(value) => handleBuyerFilterChange('type', value)}>
+                                        <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">All Types</SelectItem>
+                                            {propertyTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2"><Label>Area</Label><Input placeholder="e.g. 1200 sq ft" value={buyerFilters.area} onChange={(e) => handleBuyerFilterChange('area', e.target.value)} /></div>
+                                <div className="space-y-2"><Label>Status</Label>
+                                     <Select value={buyerFilters.status} onValueChange={(value) => handleBuyerFilterChange('status', value)}>
+                                        <SelectTrigger><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">All Statuses</SelectItem>
+                                            {constructionStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button variant="outline" onClick={clearBuyerFilters}><FilterX className="mr-2 h-4 w-4" /> Clear</Button>
+                            </div>
+                        </CardContent>
                         <CardContent>
                             {listingsLoading ? (
-                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pt-6">
                                     {[...Array(3)].map((_, i) => (
                                         <Card key={i}>
                                             <CardHeader>
@@ -817,14 +896,14 @@ useEffect(() => {
                                         </Card>
                                     ))}
                                 </div>
-                            ) : listings && listings.length > 0 ? (
+                            ) : filteredBuyerListings && filteredBuyerListings.length > 0 ? (
                                 <motion.div 
-                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pt-6"
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
                                 >
-                                    {listings.map((buyer: any, index: number) => (
+                                    {filteredBuyerListings.map((buyer: any, index: number) => (
                                         <motion.div key={buyer.id || index} variants={itemVariants}>
                                             <Card className="h-full flex flex-col">
                                                 <CardHeader>
@@ -845,7 +924,7 @@ useEffect(() => {
                                 </motion.div>
                             ) : (
                                 <div className="text-center py-12 text-muted-foreground">
-                                    No buyer listings found or there was an error loading them.
+                                    No buyer listings match your criteria.
                                 </div>
                             )}
                         </CardContent>
@@ -868,9 +947,35 @@ useEffect(() => {
                                 </div>
                             </div>
                         </CardHeader>
+                        <CardContent className='border-b pb-6'>
+                            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end'>
+                                <div className="space-y-2"><Label>Location</Label><Input placeholder="e.g. Multan" value={sellerFilters.location} onChange={(e) => handleSellerFilterChange('location', e.target.value)} /></div>
+                                <div className="space-y-2"><Label>Price</Label><Input placeholder="e.g. 500" value={sellerFilters.price} onChange={(e) => handleSellerFilterChange('price', e.target.value)} /></div>
+                                <div className="space-y-2"><Label>Type</Label>
+                                    <Select value={sellerFilters.type} onValueChange={(value) => handleSellerFilterChange('type', value)}>
+                                        <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">All Types</SelectItem>
+                                            {propertyTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2"><Label>Area</Label><Input placeholder="e.g. 1200 sq ft" value={sellerFilters.area} onChange={(e) => handleSellerFilterChange('area', e.target.value)} /></div>
+                                <div className="space-y-2"><Label>Status</Label>
+                                     <Select value={sellerFilters.status} onValueChange={(value) => handleSellerFilterChange('status', value)}>
+                                        <SelectTrigger><SelectValue placeholder="All Statuses" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">All Statuses</SelectItem>
+                                            {constructionStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <Button variant="outline" onClick={clearSellerFilters}><FilterX className="mr-2 h-4 w-4" /> Clear</Button>
+                            </div>
+                        </CardContent>
                         <CardContent>
                             {sellerListingsLoading ? (
-                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pt-6">
                                     {[...Array(3)].map((_, i) => (
                                         <Card key={i}>
                                             <CardHeader>
@@ -885,14 +990,14 @@ useEffect(() => {
                                         </Card>
                                     ))}
                                 </div>
-                            ) : sellerListings && sellerListings.length > 0 ? (
+                            ) : filteredSellerListings && filteredSellerListings.length > 0 ? (
                                 <motion.div 
-                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 pt-6"
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
                                 >
-                                    {sellerListings.map((seller: any, index: number) => (
+                                    {filteredSellerListings.map((seller: any, index: number) => (
                                         <motion.div key={seller.id || index} variants={itemVariants}>
                                             <Card className="h-full flex flex-col">
                                                 <CardHeader>
@@ -913,7 +1018,7 @@ useEffect(() => {
                                 </motion.div>
                             ) : (
                                 <div className="text-center py-12 text-muted-foreground">
-                                    No seller listings found or there was an error loading them.
+                                    No seller listings match your criteria.
                                 </div>
                             )}
                         </CardContent>
@@ -1000,6 +1105,7 @@ useEffect(() => {
 }
 
     
+
 
 
 
