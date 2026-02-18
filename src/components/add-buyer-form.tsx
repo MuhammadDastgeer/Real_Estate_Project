@@ -23,8 +23,10 @@ const formSchema = z.object({
   phoneNumber: z.string().min(1, 'Phone number is required'),
   location: z.string().min(1, 'Location is required'),
   priceRange: z.string().min(1, 'Price range is required'),
+  priceCurrency: z.enum(['USD', 'PKR']),
   propertyType: z.enum(['House', 'Flat', 'Plot', 'Commercial']),
   area: z.string().min(1, 'Area is required'),
+  areaUnit: z.enum(['sq ft', 'marla', 'kanal']),
   constructionStatus: z.enum(['Ready to move', 'Under construction']),
 });
 
@@ -48,8 +50,10 @@ export function AddBuyerForm({ onBack }: AddBuyerFormProps) {
       phoneNumber: '',
       location: '',
       priceRange: '',
+      priceCurrency: 'USD',
       propertyType: 'House',
       area: '',
+      areaUnit: 'sq ft',
       constructionStatus: 'Ready to move',
     },
   });
@@ -64,7 +68,14 @@ export function AddBuyerForm({ onBack }: AddBuyerFormProps) {
     setIsLoading(true);
     setShowPreview(false);
     try {
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/add_user', formData);
+      const { priceCurrency, areaUnit, ...rest } = formData;
+      const postData = {
+        ...rest,
+        priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
+        area: `${formData.area} ${formData.areaUnit}`,
+      };
+
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/add_user', postData);
       toast({
         title: "Success!",
         description: "Buyer information submitted successfully.",
@@ -153,32 +164,81 @@ export function AddBuyerForm({ onBack }: AddBuyerFormProps) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="priceRange"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Price Range</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., $500,000 - $700,000" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="area"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Area (sq ft / marla / kanal)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 1200 sq ft" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                    <Label>Price Range</Label>
+                    <div className="flex gap-2">
+                        <FormField
+                            control={form.control}
+                            name="priceRange"
+                            render={({ field }) => (
+                                <FormItem className="flex-grow">
+                                    <FormControl>
+                                        <Input type="number" placeholder="e.g., 500000" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="priceCurrency"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                        <SelectTrigger className="w-[100px]">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="USD">USD</SelectItem>
+                                            <SelectItem value="PKR">PKR</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    <Label>Area</Label>
+                    <div className="flex gap-2">
+                         <FormField
+                            control={form.control}
+                            name="area"
+                            render={({ field }) => (
+                                <FormItem className="flex-grow">
+                                    <FormControl>
+                                        <Input type="number" placeholder="e.g., 1200" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="areaUnit"
+                            render={({ field }) => (
+                                <FormItem>
+                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                        <SelectTrigger className="w-[120px]">
+                                            <SelectValue/>
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="sq ft">sq ft</SelectItem>
+                                            <SelectItem value="marla">marla</SelectItem>
+                                            <SelectItem value="kanal">kanal</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
                 <FormField
                   control={form.control}
                   name="propertyType"
@@ -259,9 +319,9 @@ export function AddBuyerForm({ onBack }: AddBuyerFormProps) {
                 <p><strong>Email:</strong> {formData.email}</p>
                 <p><strong>Phone:</strong> {formData.phoneNumber}</p>
                 <p><strong>Location:</strong> {formData.location}</p>
-                <p><strong>Price Range:</strong> {formData.priceRange}</p>
+                <p><strong>Price Range:</strong> {formData.priceRange} {formData.priceCurrency}</p>
                 <p><strong>Property Type:</strong> {formData.propertyType}</p>
-                <p><strong>Area:</strong> {formData.area}</p>
+                <p><strong>Area:</strong> {formData.area} {formData.areaUnit}</p>
                 <p><strong>Status:</strong> {formData.constructionStatus}</p>
             </div>
           )}

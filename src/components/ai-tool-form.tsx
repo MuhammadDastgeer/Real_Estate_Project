@@ -12,15 +12,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 // Schema for single prompt input
 const promptSchema = z.object({
   prompt: z.string().min(1, 'This field is required.'),
 });
 
+// Schema for Price Based House Prediction & AI Price Suggestion
+const priceToolSchema = z.object({
+    prompt: z.string().min(1, 'This field is required.'),
+    currency: z.enum(['USD', 'PKR']),
+});
+
 // Schema for House Basic Price Prediction
 const housePriceSchema = z.object({
     area: z.string().min(1, 'Area is required.'),
+    areaUnit: z.enum(['sq ft', 'marla', 'kanal']),
     location: z.string().min(1, 'Location is required.'),
 });
 
@@ -36,17 +45,28 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
   const { toast } = useToast();
 
   const isHousePricePrediction = title === 'House Basic Price Prediction';
+  const isPriceTool = title === 'Price Based House Prediction' || title === 'AI Price Suggestion';
+
+  const getFormSchema = () => {
+    if (isHousePricePrediction) return housePriceSchema;
+    if (isPriceTool) return priceToolSchema;
+    return promptSchema;
+  }
+
+  const getDefaultValues = () => {
+    if (isHousePricePrediction) return { area: '', areaUnit: 'sq ft', location: '' };
+    if (isPriceTool) return { prompt: '', currency: 'USD' };
+    return { prompt: '' };
+  }
 
   const form = useForm({
-    resolver: zodResolver(isHousePricePrediction ? housePriceSchema : promptSchema),
-    defaultValues: isHousePricePrediction 
-      ? { area: '', location: '' } 
-      : { prompt: '' },
+    resolver: zodResolver(getFormSchema() as any),
+    defaultValues: getDefaultValues(),
   });
 
   const getPlaceholder = (fieldName?: string) => {
     if (isHousePricePrediction) {
-        if (fieldName === 'area') return 'e.g., 1200 sq ft';
+        if (fieldName === 'area') return 'e.g., 1200';
         if (fieldName === 'location') return 'e.g., Anytown, USA';
     }
     switch (title) {
@@ -75,7 +95,22 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
     setIsLoading(true);
     setResult(null);
     try {
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/Check_Price', data);
+      let payload = data;
+      if (isHousePricePrediction) {
+        const { areaUnit, ...rest } = data;
+        payload = {
+            ...rest,
+            area: `${data.area} ${data.areaUnit}`
+        }
+      } else if (isPriceTool) {
+        const { currency, ...rest } = data;
+        payload = {
+            ...rest,
+            prompt: `${data.prompt} ${data.currency}`
+        }
+      }
+
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/Check_Price', payload);
       setResult(response.data);
       toast({
         title: "Success!",
@@ -111,19 +146,44 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {isHousePricePrediction ? (
                 <>
-                  <FormField
-                    control={form.control}
-                    name="area"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Area (sq ft / marla / kanal)</FormLabel>
-                        <FormControl>
-                          <Input placeholder={getPlaceholder('area')} {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <Label>Area</Label>
+                    <div className="flex gap-2">
+                      <FormField
+                        control={form.control}
+                        name="area"
+                        render={({ field }) => (
+                          <FormItem className="flex-grow">
+                            <FormControl>
+                              <Input type="number" placeholder={getPlaceholder('area')} {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="areaUnit"
+                        render={({ field }) => (
+                            <FormItem>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger className="w-[120px]">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="sq ft">sq ft</SelectItem>
+                                        <SelectItem value="marla">marla</SelectItem>
+                                        <SelectItem value="kanal">kanal</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
                   <FormField
                     control={form.control}
                     name="location"
@@ -138,6 +198,44 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
                     )}
                   />
                 </>
+              ) : isPriceTool ? (
+                <div className="space-y-2">
+                    <Label>Your query</Label>
+                    <div className="flex gap-2">
+                        <FormField
+                            control={form.control}
+                            name="prompt"
+                            render={({ field }) => (
+                                <FormItem className="flex-grow">
+                                    <FormControl>
+                                    <Input placeholder={getPlaceholder()} type={getInputType()} {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="currency"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger className="w-[100px]">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="USD">USD</SelectItem>
+                                            <SelectItem value="PKR">PKR</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
               ) : (
                 <FormField
                   control={form.control}
