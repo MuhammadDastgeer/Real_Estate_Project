@@ -167,7 +167,7 @@ export default function DashboardPage() {
   const [sellerFilters, setSellerFilters] = useState({ location: '', price: '', type: '', area: '', status: '' });
 
   const handleBuyerFilterChange = (filterName: string, value: string) => {
-    setBuyerFilters(prev => ({ ...prev, [filterName]: value }));
+    setBuyerFilters(prev => ({ ...prev, [filterName]: value === 'all' ? '' : value }));
   };
 
   const clearBuyerFilters = () => {
@@ -175,7 +175,7 @@ export default function DashboardPage() {
   };
   
   const handleSellerFilterChange = (filterName: string, value: string) => {
-    setSellerFilters(prev => ({ ...prev, [filterName]: value }));
+    setSellerFilters(prev => ({ ...prev, [filterName]: value === 'all' ? '' : value }));
   };
 
   const clearSellerFilters = () => {
@@ -806,7 +806,7 @@ const filteredSellerListings = useMemo(() => {
                                     <Select value={buyerFilters.type} onValueChange={(value) => handleBuyerFilterChange('type', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">All Types</SelectItem>
+                                            <SelectItem value="all">All Types</SelectItem>
                                             {propertyTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
@@ -816,7 +816,7 @@ const filteredSellerListings = useMemo(() => {
                                      <Select value={buyerFilters.status} onValueChange={(value) => handleBuyerFilterChange('status', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Statuses" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">All Statuses</SelectItem>
+                                            <SelectItem value="all">All Statuses</SelectItem>
                                             {constructionStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
@@ -900,7 +900,7 @@ const filteredSellerListings = useMemo(() => {
                                     <Select value={sellerFilters.type} onValueChange={(value) => handleSellerFilterChange('type', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">All Types</SelectItem>
+                                            <SelectItem value="all">All Types</SelectItem>
                                             {propertyTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
@@ -910,7 +910,7 @@ const filteredSellerListings = useMemo(() => {
                                      <Select value={sellerFilters.status} onValueChange={(value) => handleSellerFilterChange('status', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Statuses" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">All Statuses</SelectItem>
+                                            <SelectItem value="all">All Statuses</SelectItem>
                                             {constructionStatuses.map(status => <SelectItem key={status} value={status}>{status}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
