@@ -214,29 +214,14 @@ export default function DashboardPage() {
         
         if (response.data && Array.isArray(response.data)) {
           const buyers = response.data.map(item => item.json || item);
-          if (buyers.length === 0) {
-            setListings([]);
-            setListingsLoading(false);
+          setListings(buyers);
+          if (buyers.length > 0) {
+            toast({ title: "All listings loaded" });
+          } else {
             toast({ title: "No listings found" });
-            return;
           }
-
-          // Loop and add buyers one by one for a staggered effect
-          for (let i = 0; i < buyers.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, 300)); // Delay for effect
-            if (i === 0) {
-              setListings([buyers[i]]); // On first buyer, create the array
-              setListingsLoading(false); // And stop showing the main loader
-            } else {
-              setListings(prev => [...(prev || []), buyers[i]]); // Add subsequent buyers
-            }
-          }
-          toast({
-            title: "All listings loaded",
-          });
         } else {
           setListings([]);
-          setListingsLoading(false);
           toast({
             title: "Unexpected format",
             description: "Could not parse listings from the server.",
@@ -244,13 +229,14 @@ export default function DashboardPage() {
           });
         }
       } catch (error: any) {
-        setListingsLoading(false);
         setListings([]);
         toast({
           variant: "destructive",
           title: "Failed to fetch listings",
           description: error.response?.data?.message || "An error occurred.",
         });
+      } finally {
+        setListingsLoading(false);
       }
     };
 
@@ -268,28 +254,14 @@ export default function DashboardPage() {
         
         if (response.data && Array.isArray(response.data)) {
           const sellers = response.data.map(item => item.json || item);
-          if (sellers.length === 0) {
-            setSellerListings([]);
-            setSellerListingsLoading(false);
+          setSellerListings(sellers);
+          if (sellers.length > 0) {
+            toast({ title: "All seller listings loaded" });
+          } else {
             toast({ title: "No seller listings found" });
-            return;
           }
-
-          for (let i = 0; i < sellers.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, 300));
-            if (i === 0) {
-              setSellerListings([sellers[i]]);
-              setSellerListingsLoading(false);
-            } else {
-              setSellerListings(prev => [...(prev || []), sellers[i]]);
-            }
-          }
-          toast({
-            title: "All seller listings loaded",
-          });
         } else {
           setSellerListings([]);
-          setSellerListingsLoading(false);
           toast({
             title: "Unexpected format",
             description: "Could not parse seller listings from the server.",
@@ -297,13 +269,14 @@ export default function DashboardPage() {
           });
         }
       } catch (error: any) {
-        setSellerListingsLoading(false);
         setSellerListings([]);
         toast({
           variant: "destructive",
           title: "Failed to fetch seller listings",
           description: error.response?.data?.message || "An error occurred.",
         });
+      } finally {
+        setSellerListingsLoading(false);
       }
     };
 
@@ -324,28 +297,14 @@ export default function DashboardPage() {
             
             if (response.data && Array.isArray(response.data)) {
                 const buyers = response.data.map(item => item.json || item);
-                if (buyers.length === 0) {
-                    setListings([]);
-                    setListingsLoading(false);
-                    toast({ title: "No listings found" });
-                    return;
+                setListings(buyers);
+                if (buyers.length > 0) {
+                  toast({ title: "All listings loaded" });
+                } else {
+                  toast({ title: "No listings found" });
                 }
-
-                for (let i = 0; i < buyers.length; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 300)); 
-                    if (i === 0) {
-                        setListings([buyers[i]]); 
-                        setListingsLoading(false); 
-                    } else {
-                        setListings(prev => [...(prev || []), buyers[i]]); 
-                    }
-                }
-                toast({
-                    title: "All listings loaded",
-                });
             } else {
                 setListings([]);
-                setListingsLoading(false);
                 toast({
                     title: "Unexpected format",
                     description: "Could not parse listings from the server.",
@@ -353,13 +312,14 @@ export default function DashboardPage() {
                 });
             }
         } catch (error: any) {
-            setListingsLoading(false);
             setListings([]);
             toast({
                 variant: "destructive",
                 title: "Failed to fetch listings",
                 description: error.response?.data?.message || "An error occurred.",
             });
+        } finally {
+            setListingsLoading(false);
         }
     };
 
@@ -380,28 +340,14 @@ useEffect(() => {
             
             if (response.data && Array.isArray(response.data)) {
                 const sellers = response.data.map(item => item.json || item);
-                if (sellers.length === 0) {
-                    setSellerListings([]);
-                    setSellerListingsLoading(false);
-                    toast({ title: "No seller listings found" });
-                    return;
+                setSellerListings(sellers);
+                if (sellers.length > 0) {
+                  toast({ title: "All seller listings loaded" });
+                } else {
+                  toast({ title: "No seller listings found" });
                 }
-
-                for (let i = 0; i < sellers.length; i++) {
-                    await new Promise(resolve => setTimeout(resolve, 300));
-                    if (i === 0) {
-                        setSellerListings([sellers[i]]);
-                        setSellerListingsLoading(false);
-                    } else {
-                        setSellerListings(prev => [...(prev || []), sellers[i]]);
-                    }
-                }
-                toast({
-                    title: "All seller listings loaded",
-                });
             } else {
                 setSellerListings([]);
-                setSellerListingsLoading(false);
                 toast({
                     title: "Unexpected format",
                     description: "Could not parse seller listings from the server.",
@@ -409,13 +355,14 @@ useEffect(() => {
                 });
             }
         } catch (error: any) {
-            setSellerListingsLoading(false);
             setSellerListings([]);
             toast({
                 variant: "destructive",
                 title: "Failed to fetch seller listings",
                 description: error.response?.data?.message || "An error occurred.",
             });
+        } finally {
+            setSellerListingsLoading(false);
         }
     };
 
