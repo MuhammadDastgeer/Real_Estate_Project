@@ -44,16 +44,16 @@ const dashboardCards = [
     title: 'Buyer Listing',
     description: 'View and manage all your buyer listings.',
     cta: 'View Listings',
-    actionType: 'link',
-    target: '#',
+    actionType: 'viewDashboard',
+    target: 'buyerListing',
   },
   {
     icon: Building,
     title: 'Seller Listing',
     description: 'View and manage all your seller listings.',
     cta: 'View Listings',
-    actionType: 'link',
-    target: '#',
+    actionType: 'viewDashboard',
+    target: 'sellerListing',
   },
 ];
 
@@ -147,6 +147,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<'dashboard' | 'buyer' | 'seller'>('dashboard');
+  const [dashboardView, setDashboardView] = useState<'default' | 'buyerListing' | 'sellerListing'>('default');
   const [buyerToolView, setBuyerToolView] = useState<'default' | 'addBuyer' | 'assistant' | 'exploreBuyerListing'>('default');
   const [sellerToolView, setSellerToolView] = useState<'default' | 'addSeller' | 'assistant' | 'exploreSellerListing'>('default');
   const [activeAssistant, setActiveAssistant] = useState<{ title: string; description: string; cta: string; } | null>(null);
@@ -283,6 +284,118 @@ export default function DashboardPage() {
 
     fetchSellerListings();
   }, [sellerToolView, toast]);
+
+  useEffect(() => {
+    if (dashboardView !== 'buyerListing') {
+      if(listings) setListings(null);
+      return;
+    }
+
+    const fetchListings = async () => {
+        setListingsLoading(true);
+        setListings(null);
+        try {
+            const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_buyer', {});
+            
+            if (response.data && Array.isArray(response.data)) {
+                const buyers = response.data.map(item => item.json || item);
+                if (buyers.length === 0) {
+                    setListings([]);
+                    setListingsLoading(false);
+                    toast({ title: "No listings found" });
+                    return;
+                }
+
+                for (let i = 0; i < buyers.length; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 300)); 
+                    if (i === 0) {
+                        setListings([buyers[i]]); 
+                        setListingsLoading(false); 
+                    } else {
+                        setListings(prev => [...(prev || []), buyers[i]]); 
+                    }
+                }
+                toast({
+                    title: "All listings loaded",
+                });
+            } else {
+                setListings([]);
+                setListingsLoading(false);
+                toast({
+                    title: "Unexpected format",
+                    description: "Could not parse listings from the server.",
+                    variant: "destructive",
+                });
+            }
+        } catch (error: any) {
+            setListingsLoading(false);
+            setListings([]);
+            toast({
+                variant: "destructive",
+                title: "Failed to fetch listings",
+                description: error.response?.data?.message || "An error occurred.",
+            });
+        }
+    };
+
+    fetchListings();
+}, [dashboardView, toast]);
+
+useEffect(() => {
+    if (dashboardView !== 'sellerListing') {
+        if(sellerListings) setSellerListings(null);
+        return;
+    }
+
+    const fetchSellerListings = async () => {
+        setSellerListingsLoading(true);
+        setSellerListings(null);
+        try {
+            const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_seller', {});
+            
+            if (response.data && Array.isArray(response.data)) {
+                const sellers = response.data.map(item => item.json || item);
+                if (sellers.length === 0) {
+                    setSellerListings([]);
+                    setSellerListingsLoading(false);
+                    toast({ title: "No seller listings found" });
+                    return;
+                }
+
+                for (let i = 0; i < sellers.length; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    if (i === 0) {
+                        setSellerListings([sellers[i]]);
+                        setSellerListingsLoading(false);
+                    } else {
+                        setSellerListings(prev => [...(prev || []), sellers[i]]);
+                    }
+                }
+                toast({
+                    title: "All seller listings loaded",
+                });
+            } else {
+                setSellerListings([]);
+                setSellerListingsLoading(false);
+                toast({
+                    title: "Unexpected format",
+                    description: "Could not parse seller listings from the server.",
+                    variant: "destructive",
+                });
+            }
+        } catch (error: any) {
+            setSellerListingsLoading(false);
+            setSellerListings([]);
+            toast({
+                variant: "destructive",
+                title: "Failed to fetch seller listings",
+                description: error.response?.data?.message || "An error occurred.",
+            });
+        }
+    };
+
+    fetchSellerListings();
+}, [dashboardView, toast]);
 
 
    const containerVariants = {
@@ -672,6 +785,142 @@ export default function DashboardPage() {
         );
       case 'dashboard':
       default:
+        if (dashboardView === 'buyerListing') {
+            return (
+                <motion.div initial="hidden" animate="visible" variants={containerVariants}>
+                    <Card>
+                        <CardHeader>
+                            <div className='flex items-center gap-4'>
+                                <Button variant="ghost" size="icon" onClick={() => setDashboardView('default')} disabled={listingsLoading}>
+                                    <ArrowLeft />
+                                </Button>
+                                <div>
+                                    <CardTitle>Buyer Listings</CardTitle>
+                                    <CardDescription>A list of all potential buyers.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {listingsLoading ? (
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                    {[...Array(3)].map((_, i) => (
+                                        <Card key={i}>
+                                            <CardHeader>
+                                                <Skeleton className="h-6 w-3/4" />
+                                            </CardHeader>
+                                            <CardContent className="space-y-2 pt-4">
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-2/3" />
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-1/2" />
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : listings && listings.length > 0 ? (
+                                <motion.div 
+                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
+                                    {listings.map((buyer: any, index: number) => (
+                                        <motion.div key={buyer.id || index} variants={itemVariants}>
+                                            <Card className="h-full flex flex-col">
+                                                <CardHeader>
+                                                    <CardTitle className="text-xl">{buyer.Name || 'Unnamed Buyer'}</CardTitle>
+                                                    <CardDescription>{buyer.Email || 'No email provided'}</CardDescription>
+                                                </CardHeader>
+                                                <CardContent className="space-y-1 text-sm flex-grow">
+                                                    <p><strong>Phone:</strong> {buyer.Phone_Number || 'N/A'}</p>
+                                                    <p><strong>Location:</strong> {buyer.Location_ || 'N/A'}</p>
+                                                    <p><strong>Price:</strong> {buyer.Price_Range || 'N/A'}</p>
+                                                    <p><strong>Type:</strong> {buyer.Property_Type || 'N/A'}</p>
+                                                    <p><strong>Area:</strong> {buyer.Area || 'N/A'}</p>
+                                                    <p><strong>Status:</strong> {buyer.Construction_Status || 'N/A'}</p>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            ) : (
+                                <div className="text-center py-12 text-muted-foreground">
+                                    No buyer listings found or there was an error loading them.
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )
+        }
+        if (dashboardView === 'sellerListing') {
+            return (
+                <motion.div initial="hidden" animate="visible" variants={containerVariants}>
+                    <Card>
+                        <CardHeader>
+                            <div className='flex items-center gap-4'>
+                                <Button variant="ghost" size="icon" onClick={() => setDashboardView('default')} disabled={sellerListingsLoading}>
+                                    <ArrowLeft />
+                                </Button>
+                                <div>
+                                    <CardTitle>Seller Listings</CardTitle>
+                                    <CardDescription>A list of all potential sellers.</CardDescription>
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {sellerListingsLoading ? (
+                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                    {[...Array(3)].map((_, i) => (
+                                        <Card key={i}>
+                                            <CardHeader>
+                                                <Skeleton className="h-6 w-3/4" />
+                                            </CardHeader>
+                                            <CardContent className="space-y-2 pt-4">
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-2/3" />
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-1/2" />
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : sellerListings && sellerListings.length > 0 ? (
+                                <motion.div 
+                                    className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
+                                    {sellerListings.map((seller: any, index: number) => (
+                                        <motion.div key={seller.id || index} variants={itemVariants}>
+                                            <Card className="h-full flex flex-col">
+                                                <CardHeader>
+                                                    <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
+                                                    <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
+                                                </CardHeader>
+                                                <CardContent className="space-y-1 text-sm flex-grow">
+                                                    <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
+                                                    <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
+                                                    <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
+                                                    <p><strong>Type:</strong> {seller.Property_Type || 'N/A'}</p>
+                                                    <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
+                                                    <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
+                                                </CardContent>
+                                            </Card>
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+                            ) : (
+                                <div className="text-center py-12 text-muted-foreground">
+                                    No seller listings found or there was an error loading them.
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )
+        }
         return (
           <>
             <motion.div 
@@ -724,6 +973,10 @@ export default function DashboardPage() {
                             <Button onClick={() => setActiveView(card.target as 'dashboard' | 'buyer' | 'seller')} className="w-full">
                                 {card.cta}
                             </Button>
+                        ) : card.actionType === 'viewDashboard' ? (
+                            <Button onClick={() => setDashboardView(card.target as 'buyerListing' | 'sellerListing')} className="w-full">
+                                {card.cta}
+                            </Button>
                         ) : (
                             <Button asChild className="w-full">
                                 <Link href={card.target as string}>{card.cta}</Link>
@@ -747,6 +1000,7 @@ export default function DashboardPage() {
 }
 
     
+
 
 
 
