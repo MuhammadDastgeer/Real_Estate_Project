@@ -146,6 +146,8 @@ const sellerTools = [
 
 const propertyTypes = ['House', 'Flat', 'Plot', 'Commercial'];
 const constructionStatuses = ['Ready to move', 'Under construction'];
+const currencies = ['USD', 'PKR'];
+const areaUnits = ['sq ft', 'marla', 'kanal'];
 
 
 export default function DashboardPage() {
@@ -163,15 +165,15 @@ export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [buyerFilters, setBuyerFilters] = useState({ location: '', price: '', type: '', area: '', status: '' });
-  const [sellerFilters, setSellerFilters] = useState({ location: '', price: '', type: '', area: '', status: '' });
+  const [buyerFilters, setBuyerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
+  const [sellerFilters, setSellerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
 
   const handleBuyerFilterChange = (filterName: string, value: string) => {
     setBuyerFilters(prev => ({ ...prev, [filterName]: value === 'all' ? '' : value }));
   };
 
   const clearBuyerFilters = () => {
-    setBuyerFilters({ location: '', price: '', type: '', area: '', status: '' });
+    setBuyerFilters({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
   };
   
   const handleSellerFilterChange = (filterName: string, value: string) => {
@@ -179,7 +181,7 @@ export default function DashboardPage() {
   };
 
   const clearSellerFilters = () => {
-    setSellerFilters({ location: '', price: '', type: '', area: '', status: '' });
+    setSellerFilters({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
   };
 
 
@@ -373,9 +375,17 @@ const filteredBuyerListings = useMemo(() => {
     if (!listings) return null;
     return listings.filter(buyer => {
         const locationMatch = !buyerFilters.location || buyer.Location_?.toLowerCase().includes(buyerFilters.location.toLowerCase());
-        const priceMatch = !buyerFilters.price || buyer.Price_Range?.toLowerCase().includes(buyerFilters.price.toLowerCase());
+        
+        const priceString = buyer.Price_Range || '';
+        const priceMatch = (!buyerFilters.price || priceString.toLowerCase().includes(buyerFilters.price.toLowerCase())) && 
+                           (!buyerFilters.priceCurrency || priceString.toLowerCase().includes(buyerFilters.priceCurrency.toLowerCase()));
+
         const typeMatch = !buyerFilters.type || buyer.Property_Type === buyerFilters.type;
-        const areaMatch = !buyerFilters.area || buyer.Area?.toLowerCase().includes(buyerFilters.area.toLowerCase());
+        
+        const areaString = buyer.Area || '';
+        const areaMatch = (!buyerFilters.area || areaString.toLowerCase().includes(buyerFilters.area.toLowerCase())) &&
+                          (!buyerFilters.areaUnit || areaString.toLowerCase().includes(buyerFilters.areaUnit.toLowerCase()));
+
         const statusMatch = !buyerFilters.status || buyer.Construction_Status === buyerFilters.status;
         return locationMatch && priceMatch && typeMatch && areaMatch && statusMatch;
     });
@@ -385,9 +395,17 @@ const filteredSellerListings = useMemo(() => {
     if (!sellerListings) return null;
     return sellerListings.filter(seller => {
         const locationMatch = !sellerFilters.location || seller.Location_?.toLowerCase().includes(sellerFilters.location.toLowerCase());
-        const priceMatch = !sellerFilters.price || seller.Price_Range?.toLowerCase().includes(sellerFilters.price.toLowerCase());
+        
+        const priceString = seller.Price_Range || '';
+        const priceMatch = (!sellerFilters.price || priceString.toLowerCase().includes(sellerFilters.price.toLowerCase())) &&
+                           (!sellerFilters.priceCurrency || priceString.toLowerCase().includes(sellerFilters.priceCurrency.toLowerCase()));
+
         const typeMatch = !sellerFilters.type || seller.Property_Type === sellerFilters.type;
-        const areaMatch = !sellerFilters.area || seller.Area?.toLowerCase().includes(sellerFilters.area.toLowerCase());
+
+        const areaString = seller.Area || '';
+        const areaMatch = (!sellerFilters.area || areaString.toLowerCase().includes(sellerFilters.area.toLowerCase())) &&
+                          (!sellerFilters.areaUnit || areaString.toLowerCase().includes(sellerFilters.areaUnit.toLowerCase()));
+
         const statusMatch = !sellerFilters.status || seller.Construction_Status === sellerFilters.status;
         return locationMatch && priceMatch && typeMatch && areaMatch && statusMatch;
     });
@@ -801,7 +819,19 @@ const filteredSellerListings = useMemo(() => {
                         <CardContent className='border-b pb-6'>
                             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end'>
                                 <div className="space-y-2"><Label>Location</Label><Input placeholder="e.g. Multan" value={buyerFilters.location} onChange={(e) => handleBuyerFilterChange('location', e.target.value)} /></div>
-                                <div className="space-y-2"><Label>Price</Label><Input placeholder="e.g. 500" value={buyerFilters.price} onChange={(e) => handleBuyerFilterChange('price', e.target.value)} /></div>
+                                <div className="space-y-2">
+                                    <Label>Price</Label>
+                                    <div className="flex gap-2">
+                                        <Input placeholder="e.g. 500" value={buyerFilters.price} onChange={(e) => handleBuyerFilterChange('price', e.target.value)} />
+                                        <Select value={buyerFilters.priceCurrency} onValueChange={(value) => handleBuyerFilterChange('priceCurrency', value)}>
+                                            <SelectTrigger className="w-[100px]"><SelectValue placeholder="All" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All</SelectItem>
+                                                {currencies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                                 <div className="space-y-2"><Label>Type</Label>
                                     <Select value={buyerFilters.type} onValueChange={(value) => handleBuyerFilterChange('type', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
@@ -811,7 +841,19 @@ const filteredSellerListings = useMemo(() => {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-2"><Label>Area</Label><Input placeholder="e.g. 1200 sq ft" value={buyerFilters.area} onChange={(e) => handleBuyerFilterChange('area', e.target.value)} /></div>
+                                <div className="space-y-2">
+                                    <Label>Area</Label>
+                                    <div className="flex gap-2">
+                                        <Input placeholder="e.g. 1200" value={buyerFilters.area} onChange={(e) => handleBuyerFilterChange('area', e.target.value)} />
+                                        <Select value={buyerFilters.areaUnit} onValueChange={(value) => handleBuyerFilterChange('areaUnit', value)}>
+                                            <SelectTrigger className="w-[120px]"><SelectValue placeholder="All" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All</SelectItem>
+                                                {areaUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                                 <div className="space-y-2"><Label>Status</Label>
                                      <Select value={buyerFilters.status} onValueChange={(value) => handleBuyerFilterChange('status', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Statuses" /></SelectTrigger>
@@ -895,7 +937,19 @@ const filteredSellerListings = useMemo(() => {
                         <CardContent className='border-b pb-6'>
                             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end'>
                                 <div className="space-y-2"><Label>Location</Label><Input placeholder="e.g. Multan" value={sellerFilters.location} onChange={(e) => handleSellerFilterChange('location', e.target.value)} /></div>
-                                <div className="space-y-2"><Label>Price</Label><Input placeholder="e.g. 500" value={sellerFilters.price} onChange={(e) => handleSellerFilterChange('price', e.target.value)} /></div>
+                                <div className="space-y-2">
+                                    <Label>Price</Label>
+                                    <div className="flex gap-2">
+                                        <Input placeholder="e.g. 500" value={sellerFilters.price} onChange={(e) => handleSellerFilterChange('price', e.target.value)} />
+                                        <Select value={sellerFilters.priceCurrency} onValueChange={(value) => handleSellerFilterChange('priceCurrency', value)}>
+                                            <SelectTrigger className="w-[100px]"><SelectValue placeholder="All" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All</SelectItem>
+                                                {currencies.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                                 <div className="space-y-2"><Label>Type</Label>
                                     <Select value={sellerFilters.type} onValueChange={(value) => handleSellerFilterChange('type', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Types" /></SelectTrigger>
@@ -905,7 +959,19 @@ const filteredSellerListings = useMemo(() => {
                                         </SelectContent>
                                     </Select>
                                 </div>
-                                <div className="space-y-2"><Label>Area</Label><Input placeholder="e.g. 1200 sq ft" value={sellerFilters.area} onChange={(e) => handleSellerFilterChange('area', e.target.value)} /></div>
+                                <div className="space-y-2">
+                                    <Label>Area</Label>
+                                    <div className="flex gap-2">
+                                        <Input placeholder="e.g. 1200" value={sellerFilters.area} onChange={(e) => handleSellerFilterChange('area', e.target.value)} />
+                                        <Select value={sellerFilters.areaUnit} onValueChange={(value) => handleSellerFilterChange('areaUnit', value)}>
+                                            <SelectTrigger className="w-[120px]"><SelectValue placeholder="All" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All</SelectItem>
+                                                {areaUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                                 <div className="space-y-2"><Label>Status</Label>
                                      <Select value={sellerFilters.status} onValueChange={(value) => handleSellerFilterChange('status', value)}>
                                         <SelectTrigger><SelectValue placeholder="All Statuses" /></SelectTrigger>
