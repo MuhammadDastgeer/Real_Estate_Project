@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,6 +14,22 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+
+const usdPriceRanges = [
+  '50,000 - 100,000',
+  '100,001 - 250,000',
+  '250,001 - 500,000',
+  '500,001 - 1,000,000',
+  '1,000,001+',
+];
+
+const pkrPriceRanges = [
+  '1,000,000 - 5,000,000',
+  '5,000,001 - 10,000,000',
+  '10,000,001 - 25,000,000',
+  '25,000,001 - 50,000,000',
+  '50,000,001+',
+];
 
 // Schema for single prompt input
 const promptSchema = z.object({
@@ -63,6 +79,16 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
     resolver: zodResolver(getFormSchema() as any),
     defaultValues: getDefaultValues(),
   });
+
+  const currency = form.watch('currency');
+  const priceRanges = currency === 'USD' ? usdPriceRanges : pkrPriceRanges;
+
+  useEffect(() => {
+    if (isPriceTool && form.getValues('prompt')) {
+      form.setValue('prompt', '');
+    }
+  }, [currency, form, isPriceTool]);
+
 
   const getPlaceholder = (fieldName?: string) => {
     if (isHousePricePrediction) {
@@ -200,16 +226,25 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
                 </>
               ) : isPriceTool ? (
                 <div className="space-y-2">
-                    <Label>Your query</Label>
+                    <Label>Price</Label>
                     <div className="flex gap-2">
                         <FormField
                             control={form.control}
                             name="prompt"
                             render={({ field }) => (
                                 <FormItem className="flex-grow">
-                                    <FormControl>
-                                    <Input placeholder={getPlaceholder()} type={getInputType()} {...field} />
-                                    </FormControl>
+                                     <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a price range" />
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {priceRanges.map((range) => (
+                                                <SelectItem key={range} value={range}>{range}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

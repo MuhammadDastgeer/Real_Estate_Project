@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -16,6 +16,22 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
+
+const usdPriceRanges = [
+  '50,000 - 100,000',
+  '100,001 - 250,000',
+  '250,001 - 500,000',
+  '500,001 - 1,000,000',
+  '1,000,001+',
+];
+
+const pkrPriceRanges = [
+  '1,000,000 - 5,000,000',
+  '5,000,001 - 10,000,000',
+  '10,000,001 - 25,000,000',
+  '25,000,001 - 50,000,000',
+  '50,000,001+',
+];
 
 const formSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -57,6 +73,16 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
       constructionStatus: 'Ready to move',
     },
   });
+
+  const priceCurrency = form.watch('priceCurrency');
+  const priceRanges = priceCurrency === 'USD' ? usdPriceRanges : pkrPriceRanges;
+
+  useEffect(() => {
+    if (form.getValues('priceRange')) {
+      form.setValue('priceRange', '');
+    }
+  }, [priceCurrency, form]);
+
 
   function onSubmit(data: FormData) {
     setFormData(data);
@@ -167,14 +193,23 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
                 <div className="space-y-2">
                     <Label>Expected Price</Label>
                     <div className="flex gap-2">
-                        <FormField
+                         <FormField
                             control={form.control}
                             name="priceRange"
                             render={({ field }) => (
                                 <FormItem className="flex-grow">
-                                    <FormControl>
-                                        <Input type="number" placeholder="e.g., 1200000" {...field} />
-                                    </FormControl>
+                                     <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a price range" />
+                                        </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {priceRanges.map((range) => (
+                                                <SelectItem key={range} value={range}>{range}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}

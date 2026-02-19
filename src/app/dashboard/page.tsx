@@ -23,6 +23,22 @@ interface User {
     email: string;
 }
 
+const usdPriceRanges = [
+  '50,000 - 100,000',
+  '100,001 - 250,000',
+  '250,001 - 500,000',
+  '500,001 - 1,000,000',
+  '1,000,001+',
+];
+
+const pkrPriceRanges = [
+  '1,000,000 - 5,000,000',
+  '5,000,001 - 10,000,000',
+  '10,000,001 - 25,000,000',
+  '25,000,001 - 50,000,000',
+  '50,000,001+',
+];
+
 const dashboardCards = [
   {
     icon: Home,
@@ -171,6 +187,14 @@ export default function DashboardPage() {
   const handleBuyerFilterChange = (filterName: string, value: string) => {
     setBuyerFilters(prev => ({ ...prev, [filterName]: value === 'all' ? '' : value }));
   };
+
+  useEffect(() => {
+    setBuyerFilters(prev => ({ ...prev, price: '' }));
+  }, [buyerFilters.priceCurrency]);
+  
+  useEffect(() => {
+    setSellerFilters(prev => ({ ...prev, price: '' }));
+  }, [sellerFilters.priceCurrency]);
 
   const clearBuyerFilters = () => {
     setBuyerFilters({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
@@ -377,7 +401,7 @@ const filteredBuyerListings = useMemo(() => {
         const locationMatch = !buyerFilters.location || buyer.Location_?.toLowerCase().includes(buyerFilters.location.toLowerCase());
         
         const priceString = buyer.Price_Range || '';
-        const priceMatch = (!buyerFilters.price || priceString.toLowerCase().includes(buyerFilters.price.toLowerCase())) && 
+        const priceMatch = (!buyerFilters.price || priceString.includes(buyerFilters.price)) && 
                            (!buyerFilters.priceCurrency || priceString.toLowerCase().includes(buyerFilters.priceCurrency.toLowerCase()));
 
         const typeMatch = !buyerFilters.type || buyer.Property_Type === buyerFilters.type;
@@ -397,7 +421,7 @@ const filteredSellerListings = useMemo(() => {
         const locationMatch = !sellerFilters.location || seller.Location_?.toLowerCase().includes(sellerFilters.location.toLowerCase());
         
         const priceString = seller.Price_Range || '';
-        const priceMatch = (!sellerFilters.price || priceString.toLowerCase().includes(sellerFilters.price.toLowerCase())) &&
+        const priceMatch = (!sellerFilters.price || priceString.includes(sellerFilters.price)) &&
                            (!sellerFilters.priceCurrency || priceString.toLowerCase().includes(sellerFilters.priceCurrency.toLowerCase()));
 
         const typeMatch = !sellerFilters.type || seller.Property_Type === sellerFilters.type;
@@ -822,7 +846,13 @@ const filteredSellerListings = useMemo(() => {
                                 <div className="space-y-2">
                                     <Label>Price</Label>
                                     <div className="flex gap-2">
-                                        <Input placeholder="e.g. 500" value={buyerFilters.price} onChange={(e) => handleBuyerFilterChange('price', e.target.value)} />
+                                         <Select value={buyerFilters.price} onValueChange={(value) => handleBuyerFilterChange('price', value)}>
+                                            <SelectTrigger><SelectValue placeholder="All Prices" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Prices</SelectItem>
+                                                {(buyerFilters.priceCurrency === 'PKR' ? pkrPriceRanges : usdPriceRanges).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
                                         <Select value={buyerFilters.priceCurrency} onValueChange={(value) => handleBuyerFilterChange('priceCurrency', value)}>
                                             <SelectTrigger className="w-[100px]"><SelectValue placeholder="All" /></SelectTrigger>
                                             <SelectContent>
@@ -940,7 +970,13 @@ const filteredSellerListings = useMemo(() => {
                                 <div className="space-y-2">
                                     <Label>Price</Label>
                                     <div className="flex gap-2">
-                                        <Input placeholder="e.g. 500" value={sellerFilters.price} onChange={(e) => handleSellerFilterChange('price', e.target.value)} />
+                                        <Select value={sellerFilters.price} onValueChange={(value) => handleSellerFilterChange('price', value)}>
+                                            <SelectTrigger><SelectValue placeholder="All Prices" /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="all">All Prices</SelectItem>
+                                                {(sellerFilters.priceCurrency === 'PKR' ? pkrPriceRanges : usdPriceRanges).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
                                         <Select value={sellerFilters.priceCurrency} onValueChange={(value) => handleSellerFilterChange('priceCurrency', value)}>
                                             <SelectTrigger className="w-[100px]"><SelectValue placeholder="All" /></SelectTrigger>
                                             <SelectContent>
