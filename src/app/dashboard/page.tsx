@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { ListingDetailsDialog } from '@/components/listing-details-dialog';
+import { EditListingForm } from '@/components/edit-listing-form';
 
 
 interface User {
@@ -185,6 +186,7 @@ export default function DashboardPage() {
   const [selectedListing, setSelectedListing] = useState<any | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [listingType, setListingType] = useState<'Buyer' | 'Seller'>('Buyer');
+  const [editingListing, setEditingListing] = useState<any | null>(null);
 
   const [buyerFilters, setBuyerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
   const [sellerFilters, setSellerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
@@ -222,6 +224,20 @@ export default function DashboardPage() {
 
   const clearSellerFilters = () => {
     setSellerFilters({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
+  };
+
+  const handleEditClick = (listing: any, type: 'Buyer' | 'Seller') => {
+    setEditingListing({ ...listing, type });
+  };
+
+  const handleEditSuccess = (updatedListing: any) => {
+    const { type } = editingListing;
+    if (type === 'Buyer') {
+        setListings(prev => prev?.map(l => l.id === updatedListing.id ? updatedListing : l) || null);
+    } else { // Seller
+        setSellerListings(prev => prev?.map(l => l.id === updatedListing.id ? updatedListing : l) || null);
+    }
+    setEditingListing(null);
   };
 
 
@@ -537,6 +553,16 @@ const filteredSellerListings = useMemo(() => {
   }
 
   const renderContent = () => {
+    if (editingListing) {
+      return (
+        <EditListingForm 
+          listing={editingListing}
+          onBack={() => setEditingListing(null)}
+          onEditSuccess={handleEditSuccess}
+        />
+      )
+    }
+
     switch (activeView) {
       case 'buyer':
         return (
@@ -666,7 +692,7 @@ const filteredSellerListings = useMemo(() => {
                                                 <Button className="w-full" onClick={() => handleViewDetails(buyer, 'Buyer')}>View</Button>
                                                 {user?.email === buyer.Email && (
                                                     <div className="flex w-full gap-2">
-                                                        <Button variant="outline" className="w-full">Edit</Button>
+                                                        <Button variant="outline" className="w-full" onClick={() => handleEditClick(buyer, 'Buyer')}>Edit</Button>
                                                         <Button variant="destructive" className="w-full">Delete</Button>
                                                     </div>
                                                 )}
@@ -824,7 +850,7 @@ const filteredSellerListings = useMemo(() => {
                                                     <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
                                                     {user?.email === seller.Email && (
                                                         <div className="flex w-full gap-2">
-                                                            <Button variant="outline" className="w-full">Edit</Button>
+                                                            <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
                                                             <Button variant="destructive" className="w-full">Delete</Button>
                                                         </div>
                                                     )}
@@ -973,7 +999,7 @@ const filteredSellerListings = useMemo(() => {
                                                     <Button className="w-full" onClick={() => handleViewDetails(buyer, 'Buyer')}>View</Button>
                                                      {user?.email === buyer.Email && (
                                                         <div className="flex w-full gap-2">
-                                                            <Button variant="outline" className="w-full">Edit</Button>
+                                                            <Button variant="outline" className="w-full" onClick={() => handleEditClick(buyer, 'Buyer')}>Edit</Button>
                                                             <Button variant="destructive" className="w-full">Delete</Button>
                                                         </div>
                                                     )}
@@ -1106,7 +1132,7 @@ const filteredSellerListings = useMemo(() => {
                                                     <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
                                                     {user?.email === seller.Email && (
                                                         <div className="flex w-full gap-2">
-                                                            <Button variant="outline" className="w-full">Edit</Button>
+                                                            <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
                                                             <Button variant="destructive" className="w-full">Delete</Button>
                                                         </div>
                                                     )}
