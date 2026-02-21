@@ -662,8 +662,14 @@ const filteredSellerListings = useMemo(() => {
                                                   <p><strong>Area:</strong> {buyer.Area || 'N/A'}</p>
                                                   <p><strong>Status:</strong> {buyer.Construction_Status || 'N/A'}</p>
                                               </CardContent>
-                                              <CardFooter>
+                                              <CardFooter className="flex flex-col items-stretch gap-2">
                                                 <Button className="w-full" onClick={() => handleViewDetails(buyer, 'Buyer')}>View</Button>
+                                                {user?.email === buyer.Email && (
+                                                    <div className="flex w-full gap-2">
+                                                        <Button variant="outline" className="w-full">Edit</Button>
+                                                        <Button variant="destructive" className="w-full">Delete</Button>
+                                                    </div>
+                                                )}
                                               </CardFooter>
                                           </Card>
                                       </motion.div>
@@ -814,8 +820,14 @@ const filteredSellerListings = useMemo(() => {
                                                     <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
                                                     <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
                                                 </CardContent>
-                                                <CardFooter>
+                                                <CardFooter className="flex flex-col items-stretch gap-2">
                                                     <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
+                                                    {user?.email === seller.Email && (
+                                                        <div className="flex w-full gap-2">
+                                                            <Button variant="outline" className="w-full">Edit</Button>
+                                                            <Button variant="destructive" className="w-full">Delete</Button>
+                                                        </div>
+                                                    )}
                                                 </CardFooter>
                                             </Card>
                                         </motion.div>
@@ -957,6 +969,15 @@ const filteredSellerListings = useMemo(() => {
                                                     <p><strong>Area:</strong> {buyer.Area || 'N/A'}</p>
                                                     <p><strong>Status:</strong> {buyer.Construction_Status || 'N/A'}</p>
                                                 </CardContent>
+                                                <CardFooter className="flex flex-col items-stretch gap-2">
+                                                    <Button className="w-full" onClick={() => handleViewDetails(buyer, 'Buyer')}>View</Button>
+                                                     {user?.email === buyer.Email && (
+                                                        <div className="flex w-full gap-2">
+                                                            <Button variant="outline" className="w-full">Edit</Button>
+                                                            <Button variant="destructive" className="w-full">Delete</Button>
+                                                        </div>
+                                                    )}
+                                                </CardFooter>
                                             </Card>
                                         </motion.div>
                                     ))}
@@ -1081,6 +1102,15 @@ const filteredSellerListings = useMemo(() => {
                                                     <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
                                                     <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
                                                 </CardContent>
+                                                 <CardFooter className="flex flex-col items-stretch gap-2">
+                                                    <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
+                                                    {user?.email === seller.Email && (
+                                                        <div className="flex w-full gap-2">
+                                                            <Button variant="outline" className="w-full">Edit</Button>
+                                                            <Button variant="destructive" className="w-full">Delete</Button>
+                                                        </div>
+                                                    )}
+                                                </CardFooter>
                                             </Card>
                                         </motion.div>
                                     ))}
