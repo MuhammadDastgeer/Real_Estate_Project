@@ -877,15 +877,9 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {sellerListings.map((seller: any, index: number) => {
-                                        const imageSrc = seller.image && !seller.image.startsWith('data:image') ? `data:image/jpeg;base64,${seller.image}` : seller.image;
                                         return (
                                             <motion.div key={seller.id || index} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col">
-                                                    {imageSrc && (
-                                                        <div className="aspect-video relative w-full overflow-hidden rounded-t-lg bg-muted">
-                                                            <Image src={imageSrc} alt={seller.Name || 'Property image'} fill className="object-cover" />
-                                                        </div>
-                                                    )}
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
                                                         <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
@@ -1167,15 +1161,9 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {filteredSellerListings.map((seller: any, index: number) => {
-                                        const imageSrc = seller.image && !seller.image.startsWith('data:image') ? `data:image/jpeg;base64,${seller.image}` : seller.image;
                                         return (
                                             <motion.div key={seller.id || index} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col">
-                                                    {imageSrc && (
-                                                        <div className="aspect-video relative w-full overflow-hidden rounded-t-lg bg-muted">
-                                                            <Image src={imageSrc} alt={seller.Name || 'Property image'} fill className="object-cover" />
-                                                        </div>
-                                                    )}
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
                                                         <CardDescription>{seller.Email || 'No email provided'}</CardDescription>

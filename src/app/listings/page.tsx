@@ -224,15 +224,9 @@ export default function ListingsPage() {
                             animate="visible"
                         >
                             {filteredListings.map((listing: any, index: number) => {
-                                const imageSrc = listing.image && !listing.image.startsWith('data:image') ? `data:image/jpeg;base64,${listing.image}` : listing.image;
                                 return (
                                     <motion.div key={listing.id || index} variants={itemVariants}>
                                         <Card className="h-full flex flex-col">
-                                            {imageSrc && (
-                                                <div className="aspect-video relative w-full overflow-hidden rounded-t-lg bg-muted">
-                                                    <Image src={imageSrc} alt={listing.Name || 'Property image'} fill className="object-cover" />
-                                                </div>
-                                            )}
                                             <CardHeader>
                                                 <CardTitle className="text-xl">{listing.Name || 'Unnamed Seller'}</CardTitle>
                                                 <CardDescription>{listing.Property_Type || 'N/A'}</CardDescription>
