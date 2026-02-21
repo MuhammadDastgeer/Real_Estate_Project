@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -17,15 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
-
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { firebaseConfig } from '@/firebase/config';
-
-if (!getApps().length) {
-  initializeApp(firebaseConfig);
-}
-const storage = getStorage();
 
 const usdPriceRanges = [
   '50,000 - 100,000',
@@ -57,13 +47,9 @@ const formSchema = z.object({
   area: z.string().min(1, 'Area is required'),
   areaUnit: z.enum(['sq ft', 'marla', 'kanal']),
   constructionStatus: z.enum(['Ready to move', 'Under construction']),
-  image: z.any().optional(),
 });
 
-interface ProcessedFormData extends Omit<z.infer<typeof formSchema>, 'image'> {
-    image?: File;
-    imageDataUrl?: string;
-}
+type FormData = z.infer<typeof formSchema>;
 
 interface EditListingFormProps {
     listing: any;
@@ -74,10 +60,10 @@ interface EditListingFormProps {
 export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [formData, setFormData] = useState<ProcessedFormData | null>(null);
+  const [formData, setFormData] = useState<FormData | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
 
@@ -90,7 +76,6 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
       const areaString = listing.Area || '';
       const detectedUnit = areaUnits.find(u => areaString.endsWith(u)) || 'sq ft';
       const areaValueOnly = detectedUnit ? areaString.replace(new RegExp(` ${detectedUnit}$`), '').trim() : areaString;
-      const imageUrl = listing.image || listing.Image;
 
       form.reset({
         name: listing.Name || '',
@@ -103,33 +88,12 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         area: areaValueOnly,
         areaUnit: detectedUnit as 'sq ft' | 'marla' | 'kanal',
         constructionStatus: listing.Construction_Status || 'Ready to move',
-        image: imageUrl || undefined,
       });
     }
   }, [listing, form]);
 
   const priceCurrency = form.watch('priceCurrency');
   const priceRanges = priceCurrency === 'USD' ? usdPriceRanges : pkrPriceRanges;
-  const currentImageFile = form.watch('image');
-
-  const existingImageUrl = listing.image || listing.Image;
-  const [previewImage, setPreviewImage] = useState<string | null>(existingImageUrl || null);
-
-  useEffect(() => {
-    if (currentImageFile && typeof currentImageFile !== 'string' && currentImageFile.length > 0) {
-      const file = currentImageFile[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else if (typeof currentImageFile === 'string') {
-        setPreviewImage(currentImageFile);
-    } else if (!currentImageFile) {
-        setPreviewImage(existingImageUrl || null)
-    }
-  }, [currentImageFile, existingImageUrl]);
-
 
   useEffect(() => {
     const subscription = form.watch((value, { name }) => {
@@ -140,26 +104,8 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     return () => subscription.unsubscribe();
   }, [form]);
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
-    let imageFile: File | undefined = undefined;
-    let imageDataUrl: string | undefined = existingImageUrl;
-
-    if (data.image && typeof data.image !== 'string' && data.image.length > 0) {
-        const file = data.image[0];
-        if (file.size > 5 * 1024 * 1024) {
-            form.setError('image', { type: 'manual', message: 'Image size cannot exceed 5MB.' });
-            return;
-        }
-        imageFile = file;
-        imageDataUrl = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    setFormData({ ...data, image: imageFile, imageDataUrl });
+  async function onSubmit(data: FormData) {
+    setFormData(data);
     setShowPreview(true);
   }
 
@@ -168,36 +114,11 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     setIsLoading(true);
     setShowPreview(false);
     try {
-      let imageUrl = existingImageUrl || ''; // Keep old image URL if no new one
-
-      // if new image is uploaded and firebase is configured
-      if (firebaseConfig.projectId !== "your-project-id" && formData.image instanceof File) {
-          const newFile = formData.image;
-
-          // Delete old image from storage if it exists
-          if (existingImageUrl) {
-              try {
-                  const oldImageRef = ref(storage, existingImageUrl);
-                  await deleteObject(oldImageRef);
-              } catch(e: any) {
-                  if (e.code !== 'storage/object-not-found') {
-                    console.warn("Could not delete old image from storage", e);
-                  }
-              }
-          }
-
-          // Upload new image
-          const newImageRef = ref(storage, `seller-images/${Date.now()}_${newFile.name}`);
-          await uploadBytes(newImageRef, newFile);
-          imageUrl = await getDownloadURL(newImageRef);
-      }
-
-      const { image, imageDataUrl, priceCurrency, areaUnit, ...rest } = formData;
+      const { priceCurrency, areaUnit, ...rest } = formData;
       const postData = {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
-        Image: imageUrl,
       };
       const postDataWithId = { ...postData, id: listing.id };
 
@@ -209,8 +130,6 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
       });
 
       const updatedListingData = { ...listing };
-      delete updatedListingData.image;
-      delete updatedListingData.Image;
 
       const updatedStateObject = {
         ...updatedListingData,
@@ -222,7 +141,6 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Property_Type: formData.propertyType,
         Area: `${formData.area} ${formData.areaUnit}`,
         Construction_Status: formData.constructionStatus,
-        Image: imageUrl,
       };
 
       onEditSuccess(updatedStateObject);
@@ -449,32 +367,6 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
                         </FormItem>
                     )}
                 />
-                <div className="md:col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="image"
-                      render={({ field: { onChange, value, ...rest } }) => (
-                        <FormItem>
-                          <FormLabel>Property Image (leave blank to keep existing)</FormLabel>
-                           {previewImage && (
-                              <div className="mt-2">
-                                  <Image src={previewImage} alt="Current property image" width={200} height={150} className="rounded-md object-cover" />
-                              </div>
-                          )}
-                          <FormControl>
-                            <Input 
-                                type="file" 
-                                accept="image/*" 
-                                onChange={(e) => onChange(e.target.files)}
-                                {...rest}
-                                className="mt-2"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 Preview Changes
@@ -494,11 +386,6 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
           </AlertDialogHeader>
           {formData && (
             <div className="space-y-4 text-sm text-muted-foreground">
-                {formData.imageDataUrl && (
-                    <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
-                        <Image src={formData.imageDataUrl} alt="Property preview" fill className="object-cover" />
-                    </div>
-                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
                     <p><strong>Name:</strong> {formData.name}</p>
                     <p><strong>Email:</strong> {formData.email}</p>

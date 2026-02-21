@@ -21,8 +21,6 @@ interface ListingDetailsDialogProps {
 export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: ListingDetailsDialogProps) {
   if (!listing) return null;
 
-  const imageUrl = listing.Image || listing.image;
-
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent className="max-w-2xl">
@@ -33,11 +31,6 @@ export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: 
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-6 text-sm text-muted-foreground py-4 max-h-[70vh] overflow-y-auto pr-2">
-          {listingType === 'Seller' && imageUrl && typeof imageUrl === 'string' && (
-            <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
-               <Image src={imageUrl} alt={listing.Name || 'Property image'} fill className="object-cover" />
-            </div>
-          )}
           <div className="grid grid-cols-1 gap-y-2 gap-x-4 md:grid-cols-2">
             <div><strong className="text-foreground">Name:</strong> {listing.Name || 'N/A'}</div>
             <div><strong className="text-foreground">Email:</strong> {listing.Email || 'N/A'}</div>

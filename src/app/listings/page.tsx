@@ -223,21 +223,9 @@ export default function ListingsPage() {
                             initial="hidden"
                             animate="visible"
                         >
-                            {filteredListings.map((listing: any, index: number) => {
-                                const imageUrl = listing.Image || listing.image;
-                                return (
+                            {filteredListings.map((listing: any, index: number) => (
                                     <motion.div key={listing.id || index} variants={itemVariants}>
                                         <Card className="h-full flex flex-col overflow-hidden">
-                                            {imageUrl && typeof imageUrl === 'string' && (
-                                                <div className="relative aspect-video w-full bg-muted">
-                                                    <Image
-                                                        src={imageUrl}
-                                                        alt={listing.Name || 'Property Image'}
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </div>
-                                            )}
                                             <CardHeader>
                                                 <CardTitle className="text-xl">{listing.Name || 'Unnamed Seller'}</CardTitle>
                                                 <CardDescription>{listing.Property_Type || 'N/A'}</CardDescription>
@@ -253,8 +241,7 @@ export default function ListingsPage() {
                                             </CardFooter>
                                         </Card>
                                     </motion.div>
-                                );
-                            })}
+                                ))}
                         </motion.div>
                     ) : (
                         <div className="text-center py-12 text-muted-foreground">

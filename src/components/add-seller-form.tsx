@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -17,16 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
-
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { firebaseConfig } from '@/firebase/config';
-
-if (!getApps().length) {
-  initializeApp(firebaseConfig);
-}
-const storage = getStorage();
-
 
 const usdPriceRanges = [
   '50,000 - 100,000',
@@ -55,13 +44,9 @@ const formSchema = z.object({
   area: z.string().min(1, 'Area is required'),
   areaUnit: z.enum(['sq ft', 'marla', 'kanal']),
   constructionStatus: z.enum(['Ready to move', 'Under construction']),
-  image: z.any().optional(),
 });
 
-interface ProcessedFormData extends Omit<z.infer<typeof formSchema>, 'image'> {
-    image?: File;
-    imageDataUrl?: string;
-}
+type FormData = z.infer<typeof formSchema>;
 
 interface AddSellerFormProps {
     onBack: () => void;
@@ -70,10 +55,10 @@ interface AddSellerFormProps {
 export function AddSellerForm({ onBack }: AddSellerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [formData, setFormData] = useState<ProcessedFormData | null>(null);
+  const [formData, setFormData] = useState<FormData | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -99,26 +84,8 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
   }, [priceCurrency, form]);
 
 
-  async function onSubmit(data: z.infer<typeof formSchema>) {
-    let imageDataUrl: string | undefined = undefined;
-    let imageFile: File | undefined = undefined;
-
-    if (data.image && data.image.length > 0) {
-        const file = data.image[0];
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-            form.setError('image', { type: 'manual', message: 'Image size cannot exceed 5MB.' });
-            return;
-        }
-        imageFile = file;
-        imageDataUrl = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
-    setFormData({ ...data, image: imageFile, imageDataUrl });
+  function onSubmit(data: FormData) {
+    setFormData(data);
     setShowPreview(true);
   }
 
@@ -127,21 +94,12 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
     setIsLoading(true);
     setShowPreview(false);
     try {
-      let imageUrl = '';
-      if (firebaseConfig.projectId !== "your-project-id" && formData.image instanceof File) {
-        const file = formData.image;
-        const storageRef = ref(storage, `seller-images/${Date.now()}_${file.name}`);
-        await uploadBytes(storageRef, file);
-        imageUrl = await getDownloadURL(storageRef);
-      }
-
-      const { image, imageDataUrl, priceCurrency, areaUnit, ...rest } = formData;
+      const { priceCurrency, areaUnit, ...rest } = formData;
       
       const postData = {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
-        Image: imageUrl
       };
 
       const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/add_seller', postData);
@@ -374,24 +332,6 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
                         </FormItem>
                     )}
                     />
-                 <FormField
-                  control={form.control}
-                  name="image"
-                  render={({ field: { onChange, value, ...rest } }) => (
-                    <FormItem>
-                      <FormLabel>Property Image</FormLabel>
-                      <FormControl>
-                        <Input 
-                            type="file" 
-                            accept="image/*" 
-                            onChange={(e) => onChange(e.target.files)}
-                            {...rest}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 Preview Details
@@ -411,11 +351,6 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
           </AlertDialogHeader>
           {formData && (
             <div className="space-y-4 text-sm text-muted-foreground">
-                {formData.imageDataUrl && (
-                    <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
-                        <Image src={formData.imageDataUrl} alt="Property preview" fill className="object-cover" />
-                    </div>
-                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
                     <p><strong>Name:</strong> {formData.name}</p>
                     <p><strong>Email:</strong> {formData.email}</p>

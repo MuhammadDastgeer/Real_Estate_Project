@@ -21,15 +21,6 @@ import { ListingDetailsDialog } from '@/components/listing-details-dialog';
 import { EditListingForm } from '@/components/edit-listing-form';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getStorage, ref, deleteObject } from 'firebase/storage';
-import { firebaseConfig } from '@/firebase/config';
-
-if (!getApps().length) {
-  initializeApp(firebaseConfig);
-}
-const storage = getStorage();
-
 interface User {
     name: string;
     email: string;
@@ -263,23 +254,7 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
-      const imageUrl = listingToDelete.Image || listingToDelete.image;
-      if (listingToDelete.type === 'Seller' && imageUrl) {
-        try {
-          const imageRef = ref(storage, imageUrl);
-          await deleteObject(imageRef);
-        } catch (e: any) {
-          if (e.code !== 'storage/object-not-found') {
-            console.warn("Could not delete image from storage", e);
-          }
-        }
-      }
-
-      const payload: { id: string; Image?: string } = { id: listingToDelete.id };
-      if (listingToDelete.type === 'Seller' && imageUrl) {
-        payload.Image = imageUrl;
-      }
-      await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', payload);
+      await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', { id: listingToDelete.id });
       
       toast({
         title: "Success!",
@@ -896,21 +871,9 @@ const filteredSellerListings = useMemo(() => {
                                     initial="hidden"
                                     animate="visible"
                                 >
-                                    {sellerListings.map((seller: any, index: number) => {
-                                        const imageUrl = seller.Image || seller.image;
-                                        return (
+                                    {sellerListings.map((seller: any, index: number) => (
                                             <motion.div key={seller.id || index} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col overflow-hidden">
-                                                    {imageUrl && typeof imageUrl === 'string' && (
-                                                        <div className="relative aspect-video w-full bg-muted">
-                                                            <Image
-                                                                src={imageUrl}
-                                                                alt={seller.Name || 'Property Image'}
-                                                                fill
-                                                                className="object-cover"
-                                                            />
-                                                        </div>
-                                                    )}
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
                                                         <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
@@ -934,8 +897,7 @@ const filteredSellerListings = useMemo(() => {
                                                     </CardFooter>
                                                 </Card>
                                             </motion.div>
-                                        );
-                                    })}
+                                    ))}
                                 </motion.div>
                             ) : (
                                 <div className="text-center py-12 text-muted-foreground">
@@ -1192,20 +1154,9 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {filteredSellerListings.map((seller: any, index: number) => {
-                                        const imageUrl = seller.Image || seller.image;
                                         return (
                                             <motion.div key={seller.id || index} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col overflow-hidden">
-                                                    {imageUrl && typeof imageUrl === 'string' && (
-                                                        <div className="relative aspect-video w-full bg-muted">
-                                                            <Image
-                                                                src={imageUrl}
-                                                                alt={seller.Name || 'Property Image'}
-                                                                fill
-                                                                className="object-cover"
-                                                            />
-                                                        </div>
-                                                    )}
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
                                                         <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
