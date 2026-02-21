@@ -192,12 +192,12 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
           imageUrl = await getDownloadURL(newImageRef);
       }
 
-      const { image, imageDataUrl, ...rest } = formData;
+      const { image, imageDataUrl, priceCurrency, areaUnit, ...rest } = formData;
       const postData = {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
-        image: imageUrl,
+        Image: imageUrl,
       };
       const postDataWithId = { ...postData, id: listing.id };
 
@@ -208,8 +208,12 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         description: "Listing updated successfully.",
       });
 
+      const updatedListingData = { ...listing };
+      delete updatedListingData.image;
+      delete updatedListingData.Image;
+
       const updatedStateObject = {
-        ...listing,
+        ...updatedListingData,
         Name: formData.name,
         Email: formData.email,
         Phone_Number: formData.phoneNumber,
@@ -218,7 +222,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Property_Type: formData.propertyType,
         Area: `${formData.area} ${formData.areaUnit}`,
         Construction_Status: formData.constructionStatus,
-        image: imageUrl,
+        Image: imageUrl,
       };
 
       onEditSuccess(updatedStateObject);

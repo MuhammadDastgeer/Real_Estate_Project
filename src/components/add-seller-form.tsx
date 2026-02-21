@@ -141,7 +141,7 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
-        image: imageUrl
+        Image: imageUrl
       };
 
       const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/add_seller', postData);
