@@ -224,20 +224,31 @@ export default function ListingsPage() {
                             animate="visible"
                         >
                             {filteredListings.map((listing: any, index: number) => {
+                                const imageUrl = listing.Image || listing.image;
                                 return (
                                     <motion.div key={listing.id || index} variants={itemVariants}>
-                                        <Card className="h-full flex flex-col">
+                                        <Card className="h-full flex flex-col overflow-hidden">
+                                            {imageUrl && (
+                                                <div className="relative aspect-video w-full bg-muted">
+                                                    <Image
+                                                        src={imageUrl}
+                                                        alt={listing.Name || 'Property Image'}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                </div>
+                                            )}
                                             <CardHeader>
                                                 <CardTitle className="text-xl">{listing.Name || 'Unnamed Seller'}</CardTitle>
                                                 <CardDescription>{listing.Property_Type || 'N/A'}</CardDescription>
                                             </CardHeader>
-                                            <CardContent className="space-y-1 text-sm flex-grow">
+                                            <CardContent className="space-y-1 text-sm flex-grow pt-4">
                                                 <p><strong>Location:</strong> {listing.Location_ || 'N/A'}</p>
                                                 <p><strong>Price:</strong> {listing.Price_Range || 'N/A'}</p>
                                                 <p><strong>Area:</strong> {listing.Area || 'N/A'}</p>
                                                 <p><strong>Status:</strong> {listing.Construction_Status || 'N/A'}</p>
                                             </CardContent>
-                                            <CardFooter>
+                                            <CardFooter className="mt-auto">
                                                 <Button className="w-full" onClick={() => handleViewDetails(listing)}>View Details</Button>
                                             </CardFooter>
                                         </Card>

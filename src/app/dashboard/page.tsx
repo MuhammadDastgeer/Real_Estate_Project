@@ -263,7 +263,7 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
-      const imageUrl = listingToDelete.image || listingToDelete.Image;
+      const imageUrl = listingToDelete.Image || listingToDelete.image;
       if (listingToDelete.type === 'Seller' && imageUrl) {
         try {
           const imageRef = ref(storage, imageUrl);
@@ -275,9 +275,9 @@ export default function DashboardPage() {
         }
       }
 
-      const payload: { id: string; image?: string } = { id: listingToDelete.id };
+      const payload: { id: string; Image?: string } = { id: listingToDelete.id };
       if (listingToDelete.type === 'Seller' && imageUrl) {
-        payload.image = imageUrl;
+        payload.Image = imageUrl;
       }
       await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', payload);
       
@@ -897,14 +897,25 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {sellerListings.map((seller: any, index: number) => {
+                                        const imageUrl = seller.Image || seller.image;
                                         return (
                                             <motion.div key={seller.id || index} variants={itemVariants}>
-                                                <Card className="h-full flex flex-col">
+                                                <Card className="h-full flex flex-col overflow-hidden">
+                                                    {imageUrl && (
+                                                        <div className="relative aspect-video w-full bg-muted">
+                                                            <Image
+                                                                src={imageUrl}
+                                                                alt={seller.Name || 'Property Image'}
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
                                                         <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
                                                     </CardHeader>
-                                                    <CardContent className="space-y-1 text-sm flex-grow">
+                                                    <CardContent className="space-y-1 text-sm flex-grow pt-4">
                                                         <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
                                                         <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
                                                         <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
@@ -912,7 +923,7 @@ const filteredSellerListings = useMemo(() => {
                                                         <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
                                                         <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
                                                     </CardContent>
-                                                    <CardFooter className="flex flex-col items-stretch gap-2">
+                                                    <CardFooter className="mt-auto flex flex-col items-stretch gap-2">
                                                         <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
                                                         {user?.email === seller.Email && (
                                                             <div className="flex w-full gap-2">
@@ -1181,14 +1192,25 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {filteredSellerListings.map((seller: any, index: number) => {
+                                        const imageUrl = seller.Image || seller.image;
                                         return (
                                             <motion.div key={seller.id || index} variants={itemVariants}>
-                                                <Card className="h-full flex flex-col">
+                                                <Card className="h-full flex flex-col overflow-hidden">
+                                                    {imageUrl && (
+                                                        <div className="relative aspect-video w-full bg-muted">
+                                                            <Image
+                                                                src={imageUrl}
+                                                                alt={seller.Name || 'Property Image'}
+                                                                fill
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
+                                                    )}
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
                                                         <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
                                                     </CardHeader>
-                                                    <CardContent className="space-y-1 text-sm flex-grow">
+                                                    <CardContent className="space-y-1 text-sm flex-grow pt-4">
                                                         <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
                                                         <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
                                                         <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
@@ -1196,7 +1218,7 @@ const filteredSellerListings = useMemo(() => {
                                                         <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
                                                         <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
                                                     </CardContent>
-                                                     <CardFooter className="flex flex-col items-stretch gap-2">
+                                                     <CardFooter className="mt-auto flex flex-col items-stretch gap-2">
                                                         <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
                                                         {user?.email === seller.Email && (
                                                             <div className="flex w-full gap-2">
