@@ -21,7 +21,7 @@ interface ListingDetailsDialogProps {
 export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: ListingDetailsDialogProps) {
   if (!listing) return null;
 
-  const imageUrl = listing.image || listing.Image;
+  const imageUrl = listing.Image || listing.image;
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -32,21 +32,21 @@ export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: 
             Full information for {listing.Name}.
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <div className="space-y-4 text-sm text-muted-foreground py-4">
+        <div className="space-y-6 text-sm text-muted-foreground py-4 max-h-[70vh] overflow-y-auto pr-2">
           {listingType === 'Seller' && imageUrl && typeof imageUrl === 'string' && (
             <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
                <Image src={imageUrl} alt={listing.Name || 'Property image'} fill className="object-cover" />
             </div>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <p><strong>Name:</strong> {listing.Name || 'N/A'}</p>
-            <p><strong>Email:</strong> {listing.Email || 'N/A'}</p>
-            <p><strong>Phone:</strong> {listing.Phone_Number || 'N/A'}</p>
-            <p><strong>Location:</strong> {listing.Location_ || 'N/A'}</p>
-            <p><strong>Price:</strong> {listing.Price_Range || 'N/A'}</p>
-            <p><strong>Type:</strong> {listing.Property_Type || 'N/A'}</p>
-            <p><strong>Area:</strong> {listing.Area || 'N/A'}</p>
-            <p><strong>Status:</strong> {listing.Construction_Status || 'N/A'}</p>
+          <div className="grid grid-cols-1 gap-y-2 gap-x-4 md:grid-cols-2">
+            <div><strong className="text-foreground">Name:</strong> {listing.Name || 'N/A'}</div>
+            <div><strong className="text-foreground">Email:</strong> {listing.Email || 'N/A'}</div>
+            <div><strong className="text-foreground">Phone:</strong> {listing.Phone_Number || 'N/A'}</div>
+            <div><strong className="text-foreground">Location:</strong> {listing.Location_ || 'N/A'}</div>
+            <div><strong className="text-foreground">Price:</strong> {listing.Price_Range || 'N/A'}</div>
+            <div><strong className="text-foreground">Type:</strong> {listing.Property_Type || 'N/A'}</div>
+            <div><strong className="text-foreground">Area:</strong> {listing.Area || 'N/A'}</div>
+            <div><strong className="text-foreground">Status:</strong> {listing.Construction_Status || 'N/A'}</div>
           </div>
           <div>
             <h4 className="font-semibold text-foreground mb-2">Location Map</h4>
