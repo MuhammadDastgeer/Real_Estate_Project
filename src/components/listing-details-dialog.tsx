@@ -21,9 +21,10 @@ interface ListingDetailsDialogProps {
 export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: ListingDetailsDialogProps) {
   if (!listing) return null;
 
-  const imageSrc = listing.image && !listing.image.startsWith('data:image') 
-    ? `data:image/jpeg;base64,${listing.image}` 
-    : listing.image;
+  let imageSrc: string | null = null;
+  if (listing.image && typeof listing.image === 'string') {
+    imageSrc = listing.image.startsWith('data:image') ? listing.image : `data:image/jpeg;base64,${listing.image}`;
+  }
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
