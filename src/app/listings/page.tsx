@@ -228,7 +228,7 @@ export default function ListingsPage() {
                                 return (
                                     <motion.div key={listing.id || index} variants={itemVariants}>
                                         <Card className="h-full flex flex-col overflow-hidden">
-                                            {imageUrl && (
+                                            {imageUrl && typeof imageUrl === 'string' && (
                                                 <div className="relative aspect-video w-full bg-muted">
                                                     <Image
                                                         src={imageUrl}
