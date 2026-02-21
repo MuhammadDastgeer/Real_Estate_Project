@@ -386,21 +386,22 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
             </AlertDialogDescription>
           </AlertDialogHeader>
           {formData && (
-            <div className="space-y-2 text-sm text-muted-foreground">
-                <p><strong>Name:</strong> {formData.name}</p>
-                <p><strong>Email:</strong> {formData.email}</p>
-                <p><strong>Phone:</strong> {formData.phoneNumber}</p>
-                <p><strong>Location:</strong> {formData.location}</p>
-                <p><strong>Expected Price:</strong> {formData.priceRange} {formData.priceCurrency}</p>
-                <p><strong>Property Type:</strong> {formData.propertyType}</p>
-                <p><strong>Area:</strong> {formData.area} {formData.areaUnit}</p>
-                <p><strong>Status:</strong> {formData.constructionStatus}</p>
+            <div className="space-y-4 text-sm text-muted-foreground">
                 {formData.image && (
-                    <div className="mt-4">
-                        <p><strong>Image Preview:</strong></p>
-                        <Image src={formData.image} alt="Property preview" width={400} height={300} className="rounded-md mt-2 object-cover" />
+                    <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
+                        <Image src={formData.image} alt="Property preview" fill className="object-cover" />
                     </div>
                 )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                    <p><strong>Name:</strong> {formData.name}</p>
+                    <p><strong>Email:</strong> {formData.email}</p>
+                    <p><strong>Phone:</strong> {formData.phoneNumber}</p>
+                    <p><strong>Location:</strong> {formData.location}</p>
+                    <p><strong>Expected Price:</strong> {formData.priceRange} {formData.priceCurrency}</p>
+                    <p><strong>Property Type:</strong> {formData.propertyType}</p>
+                    <p><strong>Area:</strong> {formData.area} {formData.areaUnit}</p>
+                    <p><strong>Status:</strong> {formData.constructionStatus}</p>
+                </div>
             </div>
           )}
           <AlertDialogFooter>

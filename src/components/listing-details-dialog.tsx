@@ -32,7 +32,7 @@ export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: 
         </AlertDialogHeader>
         <div className="space-y-4 text-sm text-muted-foreground py-4">
           {listingType === 'Seller' && listing.image && (
-            <div className="mb-4 aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
+            <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
                <Image src={listing.image} alt={listing.Name || 'Property image'} fill className="object-cover" />
             </div>
           )}
@@ -46,7 +46,7 @@ export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: 
             <p><strong>Area:</strong> {listing.Area || 'N/A'}</p>
             <p><strong>Status:</strong> {listing.Construction_Status || 'N/A'}</p>
           </div>
-          <div className="mt-4">
+          <div>
             <h4 className="font-semibold text-foreground mb-2">Location Map</h4>
             <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted border">
               <iframe
