@@ -254,7 +254,11 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
-      await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', { id: listingToDelete.id });
+      const payload: { id: string; image?: string } = { id: listingToDelete.id };
+      if (listingToDelete.type === 'Seller' && listingToDelete.image) {
+        payload.image = listingToDelete.image;
+      }
+      await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', payload);
       
       toast({
         title: "Success!",
