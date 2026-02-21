@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, Sparkles, FilterX } from 'lucide-react';
+import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, Sparkles, FilterX, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddBuyerForm } from '@/components/add-buyer-form';
 import { AddSellerForm } from '@/components/add-seller-form';
@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { ListingDetailsDialog } from '@/components/listing-details-dialog';
 import { EditListingForm } from '@/components/edit-listing-form';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 
 interface User {
@@ -187,6 +188,9 @@ export default function DashboardPage() {
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [listingType, setListingType] = useState<'Buyer' | 'Seller'>('Buyer');
   const [editingListing, setEditingListing] = useState<any | null>(null);
+  const [listingToDelete, setListingToDelete] = useState<any | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const [buyerFilters, setBuyerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
   const [sellerFilters, setSellerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
@@ -238,6 +242,42 @@ export default function DashboardPage() {
         setSellerListings(prev => prev?.map(l => l.id === updatedListing.id ? updatedListing : l) || null);
     }
     setEditingListing(null);
+  };
+
+  const handleDeleteClick = (listing: any, type: 'Buyer' | 'Seller') => {
+    setListingToDelete({ ...listing, type });
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!listingToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', { id: listingToDelete.id });
+      
+      toast({
+        title: "Success!",
+        description: "Listing deleted successfully.",
+      });
+
+      if (listingToDelete.type === 'Buyer') {
+        setListings(prev => prev?.filter(l => l.id !== listingToDelete.id) || null);
+      } else { // Seller
+        setSellerListings(prev => prev?.filter(l => l.id !== listingToDelete.id) || null);
+      }
+      
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: error.response?.data?.message || "Could not delete listing.",
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setListingToDelete(null);
+    }
   };
 
 
@@ -693,7 +733,7 @@ const filteredSellerListings = useMemo(() => {
                                                 {user?.email === buyer.Email && (
                                                     <div className="flex w-full gap-2">
                                                         <Button variant="outline" className="w-full" onClick={() => handleEditClick(buyer, 'Buyer')}>Edit</Button>
-                                                        <Button variant="destructive" className="w-full">Delete</Button>
+                                                        <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(buyer, 'Buyer')}>Delete</Button>
                                                     </div>
                                                 )}
                                               </CardFooter>
@@ -851,7 +891,7 @@ const filteredSellerListings = useMemo(() => {
                                                     {user?.email === seller.Email && (
                                                         <div className="flex w-full gap-2">
                                                             <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
-                                                            <Button variant="destructive" className="w-full">Delete</Button>
+                                                            <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(seller, 'Seller')}>Delete</Button>
                                                         </div>
                                                     )}
                                                 </CardFooter>
@@ -1000,7 +1040,7 @@ const filteredSellerListings = useMemo(() => {
                                                      {user?.email === buyer.Email && (
                                                         <div className="flex w-full gap-2">
                                                             <Button variant="outline" className="w-full" onClick={() => handleEditClick(buyer, 'Buyer')}>Edit</Button>
-                                                            <Button variant="destructive" className="w-full">Delete</Button>
+                                                            <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(buyer, 'Buyer')}>Delete</Button>
                                                         </div>
                                                     )}
                                                 </CardFooter>
@@ -1133,7 +1173,7 @@ const filteredSellerListings = useMemo(() => {
                                                     {user?.email === seller.Email && (
                                                         <div className="flex w-full gap-2">
                                                             <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
-                                                            <Button variant="destructive" className="w-full">Delete</Button>
+                                                            <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(seller, 'Seller')}>Delete</Button>
                                                         </div>
                                                     )}
                                                 </CardFooter>
@@ -1231,6 +1271,28 @@ const filteredSellerListings = useMemo(() => {
         onClose={closeDetailsDialog}
         listingType={listingType}
       />
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={(open) => !isDeleting && setIsDeleteDialogOpen(open)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              listing from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              disabled={isDeleting}
+              className={buttonVariants({ variant: "destructive" })}
+            >
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
