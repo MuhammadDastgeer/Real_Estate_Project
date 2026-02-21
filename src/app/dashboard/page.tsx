@@ -16,6 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { ListingDetailsDialog } from '@/components/listing-details-dialog';
 
 
 interface User {
@@ -181,8 +182,23 @@ export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const [selectedListing, setSelectedListing] = useState<any | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [listingType, setListingType] = useState<'Buyer' | 'Seller'>('Buyer');
+
   const [buyerFilters, setBuyerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
   const [sellerFilters, setSellerFilters] = useState({ location: '', price: '', type: '', area: '', status: '', priceCurrency: '', areaUnit: '' });
+
+  const handleViewDetails = (listing: any, type: 'Buyer' | 'Seller') => {
+    setSelectedListing(listing);
+    setListingType(type);
+    setIsDetailsDialogOpen(true);
+  };
+
+  const closeDetailsDialog = () => {
+    setIsDetailsDialogOpen(false);
+    setSelectedListing(null);
+  };
 
   const handleBuyerFilterChange = (filterName: string, value: string) => {
     setBuyerFilters(prev => ({ ...prev, [filterName]: value === 'all' ? '' : value }));
@@ -646,6 +662,9 @@ const filteredSellerListings = useMemo(() => {
                                                   <p><strong>Area:</strong> {buyer.Area || 'N/A'}</p>
                                                   <p><strong>Status:</strong> {buyer.Construction_Status || 'N/A'}</p>
                                               </CardContent>
+                                              <CardFooter>
+                                                <Button className="w-full" onClick={() => handleViewDetails(buyer, 'Buyer')}>View</Button>
+                                              </CardFooter>
                                           </Card>
                                       </motion.div>
                                   ))}
@@ -795,6 +814,9 @@ const filteredSellerListings = useMemo(() => {
                                                     <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
                                                     <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
                                                 </CardContent>
+                                                <CardFooter>
+                                                    <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
+                                                </CardFooter>
                                             </Card>
                                         </motion.div>
                                     ))}
@@ -1147,6 +1169,12 @@ const filteredSellerListings = useMemo(() => {
   return (
     <div className="container py-12 md:py-16">
       {renderContent()}
+      <ListingDetailsDialog 
+        listing={selectedListing}
+        isOpen={isDetailsDialogOpen}
+        onClose={closeDetailsDialog}
+        listingType={listingType}
+      />
     </div>
   );
 }
