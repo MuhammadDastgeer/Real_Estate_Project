@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
+import { TelegramButton } from '@/components/telegram-button';
 
 export const metadata: Metadata = {
   title: 'Estately - Your Modern Real Estate Partner',
@@ -43,6 +44,7 @@ export default function RootLayout({
           </div>
           <Toaster />
         </ThemeProvider>
+        <TelegramButton />
         <script
           id="chat-widget"
           type="module"
