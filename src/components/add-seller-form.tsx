@@ -128,7 +128,7 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
     setShowPreview(false);
     try {
       let imageUrl = '';
-      if (formData.image instanceof File) {
+      if (firebaseConfig.projectId !== "your-project-id" && formData.image instanceof File) {
         const file = formData.image;
         const storageRef = ref(storage, `seller-images/${Date.now()}_${file.name}`);
         await uploadBytes(storageRef, file);

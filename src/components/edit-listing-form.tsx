@@ -166,8 +166,8 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     try {
       let imageUrl = listing.image || ''; // Keep old image URL if no new one
 
-      // if new image is uploaded
-      if (formData.image instanceof File) {
+      // if new image is uploaded and firebase is configured
+      if (firebaseConfig.projectId !== "your-project-id" && formData.image instanceof File) {
           const newFile = formData.image;
 
           // Delete old image from storage if it exists
