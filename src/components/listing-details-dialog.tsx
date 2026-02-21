@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -30,6 +31,11 @@ export function ListingDetailsDialog({ listing, isOpen, onClose, listingType }: 
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-4 text-sm text-muted-foreground py-4">
+          {listingType === 'Seller' && listing.image && (
+            <div className="mb-4 aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
+               <Image src={listing.image} alt={listing.Name || 'Property image'} fill className="object-cover" />
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <p><strong>Name:</strong> {listing.Name || 'N/A'}</p>
             <p><strong>Email:</strong> {listing.Email || 'N/A'}</p>

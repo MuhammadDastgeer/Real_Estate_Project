@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
 import { Loader2, ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -44,9 +45,12 @@ const formSchema = z.object({
   area: z.string().min(1, 'Area is required'),
   areaUnit: z.enum(['sq ft', 'marla', 'kanal']),
   constructionStatus: z.enum(['Ready to move', 'Under construction']),
+  image: z.any().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+interface ProcessedFormData extends Omit<z.infer<typeof formSchema>, 'image'> {
+    image?: string;
+}
 
 interface AddSellerFormProps {
     onBack: () => void;
@@ -55,10 +59,10 @@ interface AddSellerFormProps {
 export function AddSellerForm({ onBack }: AddSellerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [formData, setFormData] = useState<FormData | null>(null);
+  const [formData, setFormData] = useState<ProcessedFormData | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -84,8 +88,23 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
   }, [priceCurrency, form]);
 
 
-  function onSubmit(data: FormData) {
-    setFormData(data);
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    let imageDataUrl: string | undefined = undefined;
+    if (data.image && data.image.length > 0) {
+        const file = data.image[0];
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            form.setError('image', { type: 'manual', message: 'Image size cannot exceed 5MB.' });
+            return;
+        }
+        imageDataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    setFormData({ ...data, image: imageDataUrl });
     setShowPreview(true);
   }
 
@@ -107,7 +126,7 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
         description: "Seller information submitted successfully.",
       });
       form.reset();
-      onBack(); // Go back to the seller tools view after successful submission
+      onBack();
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -331,6 +350,24 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
                         </FormItem>
                     )}
                     />
+                 <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field: { onChange, value, ...rest } }) => (
+                    <FormItem>
+                      <FormLabel>Property Image</FormLabel>
+                      <FormControl>
+                        <Input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={(e) => onChange(e.target.files)}
+                            {...rest}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 Preview Details
@@ -358,6 +395,12 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
                 <p><strong>Property Type:</strong> {formData.propertyType}</p>
                 <p><strong>Area:</strong> {formData.area} {formData.areaUnit}</p>
                 <p><strong>Status:</strong> {formData.constructionStatus}</p>
+                {formData.image && (
+                    <div className="mt-4">
+                        <p><strong>Image Preview:</strong></p>
+                        <Image src={formData.image} alt="Property preview" width={400} height={300} className="rounded-md mt-2 object-cover" />
+                    </div>
+                )}
             </div>
           )}
           <AlertDialogFooter>

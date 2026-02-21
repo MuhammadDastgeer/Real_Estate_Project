@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import axios from 'axios';
 import { Loader2, ArrowLeft } from 'lucide-react';
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -47,9 +48,12 @@ const formSchema = z.object({
   area: z.string().min(1, 'Area is required'),
   areaUnit: z.enum(['sq ft', 'marla', 'kanal']),
   constructionStatus: z.enum(['Ready to move', 'Under construction']),
+  image: z.any().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+interface ProcessedFormData extends Omit<z.infer<typeof formSchema>, 'image'> {
+    image?: string;
+}
 
 interface EditListingFormProps {
     listing: any;
@@ -60,10 +64,10 @@ interface EditListingFormProps {
 export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [formData, setFormData] = useState<FormData | null>(null);
+  const [formData, setFormData] = useState<ProcessedFormData | null>(null);
   const { toast } = useToast();
 
-  const form = useForm<FormData>({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
@@ -88,15 +92,17 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         area: areaValueOnly,
         areaUnit: detectedUnit as 'sq ft' | 'marla' | 'kanal',
         constructionStatus: listing.Construction_Status || 'Ready to move',
+        image: listing.image || undefined,
       });
     }
   }, [listing, form]);
 
   const priceCurrency = form.watch('priceCurrency');
   const priceRanges = priceCurrency === 'USD' ? usdPriceRanges : pkrPriceRanges;
+  const currentImage = form.watch('image');
+
 
   useEffect(() => {
-    // This effect is to reset priceRange if currency changes, but we should be careful not to erase user's new selection
     const subscription = form.watch((value, { name }) => {
       if (name === 'priceCurrency') {
         form.setValue('priceRange', '');
@@ -105,8 +111,26 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     return () => subscription.unsubscribe();
   }, [form]);
 
-  function onSubmit(data: FormData) {
-    setFormData(data);
+  async function onSubmit(data: z.infer<typeof formSchema>) {
+    let imageDataUrl: string | undefined = listing.image; 
+
+    if (data.image && typeof data.image !== 'string' && data.image.length > 0) {
+        const file = data.image[0];
+        if (file.size > 5 * 1024 * 1024) {
+            form.setError('image', { type: 'manual', message: 'Image size cannot exceed 5MB.' });
+            return;
+        }
+        imageDataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    } else if (typeof data.image === 'string') {
+        imageDataUrl = data.image;
+    }
+
+    setFormData({ ...data, image: imageDataUrl });
     setShowPreview(true);
   }
 
@@ -140,6 +164,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Property_Type: formData.propertyType,
         Area: `${formData.area} ${formData.areaUnit}`,
         Construction_Status: formData.constructionStatus,
+        image: formData.image,
       };
 
       onEditSuccess(updatedStateObject);
@@ -365,7 +390,33 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
                         <FormMessage />
                         </FormItem>
                     )}
+                />
+                <div className="md:col-span-2">
+                    <FormField
+                      control={form.control}
+                      name="image"
+                      render={({ field: { onChange, value, ...rest } }) => (
+                        <FormItem>
+                          <FormLabel>Property Image (leave blank to keep existing)</FormLabel>
+                          {currentImage && typeof currentImage === 'string' && (
+                              <div className="mt-2">
+                                  <Image src={currentImage} alt="Current property image" width={200} height={150} className="rounded-md object-cover" />
+                              </div>
+                          )}
+                          <FormControl>
+                            <Input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={(e) => onChange(e.target.files)}
+                                {...rest}
+                                className="mt-2"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={isLoading}>
                 Preview Changes
@@ -393,6 +444,12 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
                 <p><strong>Property Type:</strong> {formData.propertyType}</p>
                 <p><strong>Area:</strong> {formData.area} {formData.areaUnit}</p>
                 <p><strong>Status:</strong> {formData.constructionStatus}</p>
+                 {formData.image && (
+                    <div className="mt-4">
+                        <p><strong>Image Preview:</strong></p>
+                        <Image src={formData.image} alt="Property preview" width={400} height={300} className="rounded-md mt-2 object-cover" />
+                    </div>
+                )}
             </div>
           )}
           <AlertDialogFooter>
