@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Bot, Building, DollarSign, Home, List, Tag, User, UserPlus, ArrowLeft, Sparkles, FilterX, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -875,33 +876,41 @@ const filteredSellerListings = useMemo(() => {
                                     initial="hidden"
                                     animate="visible"
                                 >
-                                    {sellerListings.map((seller: any, index: number) => (
-                                        <motion.div key={seller.id || index} variants={itemVariants}>
-                                            <Card className="h-full flex flex-col">
-                                                <CardHeader>
-                                                    <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
-                                                    <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
-                                                </CardHeader>
-                                                <CardContent className="space-y-1 text-sm flex-grow">
-                                                    <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
-                                                    <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
-                                                    <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
-                                                    <p><strong>Type:</strong> {seller.Property_Type || 'N/A'}</p>
-                                                    <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
-                                                    <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
-                                                </CardContent>
-                                                <CardFooter className="flex flex-col items-stretch gap-2">
-                                                    <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
-                                                    {user?.email === seller.Email && (
-                                                        <div className="flex w-full gap-2">
-                                                            <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
-                                                            <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(seller, 'Seller')}>Delete</Button>
+                                    {sellerListings.map((seller: any, index: number) => {
+                                        const imageSrc = seller.image && !seller.image.startsWith('data:image') ? `data:image/jpeg;base64,${seller.image}` : seller.image;
+                                        return (
+                                            <motion.div key={seller.id || index} variants={itemVariants}>
+                                                <Card className="h-full flex flex-col">
+                                                    {imageSrc && (
+                                                        <div className="aspect-video relative w-full overflow-hidden rounded-t-lg bg-muted">
+                                                            <Image src={imageSrc} alt={seller.Name || 'Property image'} fill className="object-cover" />
                                                         </div>
                                                     )}
-                                                </CardFooter>
-                                            </Card>
-                                        </motion.div>
-                                    ))}
+                                                    <CardHeader>
+                                                        <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
+                                                        <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-1 text-sm flex-grow">
+                                                        <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
+                                                        <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
+                                                        <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
+                                                        <p><strong>Type:</strong> {seller.Property_Type || 'N/A'}</p>
+                                                        <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
+                                                        <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
+                                                    </CardContent>
+                                                    <CardFooter className="flex flex-col items-stretch gap-2">
+                                                        <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
+                                                        {user?.email === seller.Email && (
+                                                            <div className="flex w-full gap-2">
+                                                                <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
+                                                                <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(seller, 'Seller')}>Delete</Button>
+                                                            </div>
+                                                        )}
+                                                    </CardFooter>
+                                                </Card>
+                                            </motion.div>
+                                        );
+                                    })}
                                 </motion.div>
                             ) : (
                                 <div className="text-center py-12 text-muted-foreground">
@@ -1157,33 +1166,41 @@ const filteredSellerListings = useMemo(() => {
                                     initial="hidden"
                                     animate="visible"
                                 >
-                                    {filteredSellerListings.map((seller: any, index: number) => (
-                                        <motion.div key={seller.id || index} variants={itemVariants}>
-                                            <Card className="h-full flex flex-col">
-                                                <CardHeader>
-                                                    <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
-                                                    <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
-                                                </CardHeader>
-                                                <CardContent className="space-y-1 text-sm flex-grow">
-                                                    <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
-                                                    <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
-                                                    <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
-                                                    <p><strong>Type:</strong> {seller.Property_Type || 'N/A'}</p>
-                                                    <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
-                                                    <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
-                                                </CardContent>
-                                                 <CardFooter className="flex flex-col items-stretch gap-2">
-                                                    <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
-                                                    {user?.email === seller.Email && (
-                                                        <div className="flex w-full gap-2">
-                                                            <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
-                                                            <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(seller, 'Seller')}>Delete</Button>
+                                    {filteredSellerListings.map((seller: any, index: number) => {
+                                        const imageSrc = seller.image && !seller.image.startsWith('data:image') ? `data:image/jpeg;base64,${seller.image}` : seller.image;
+                                        return (
+                                            <motion.div key={seller.id || index} variants={itemVariants}>
+                                                <Card className="h-full flex flex-col">
+                                                    {imageSrc && (
+                                                        <div className="aspect-video relative w-full overflow-hidden rounded-t-lg bg-muted">
+                                                            <Image src={imageSrc} alt={seller.Name || 'Property image'} fill className="object-cover" />
                                                         </div>
                                                     )}
-                                                </CardFooter>
-                                            </Card>
-                                        </motion.div>
-                                    ))}
+                                                    <CardHeader>
+                                                        <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
+                                                        <CardDescription>{seller.Email || 'No email provided'}</CardDescription>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-1 text-sm flex-grow">
+                                                        <p><strong>Phone:</strong> {seller.Phone_Number || 'N/A'}</p>
+                                                        <p><strong>Location:</strong> {seller.Location_ || 'N/A'}</p>
+                                                        <p><strong>Price:</strong> {seller.Price_Range || 'N/A'}</p>
+                                                        <p><strong>Type:</strong> {seller.Property_Type || 'N/A'}</p>
+                                                        <p><strong>Area:</strong> {seller.Area || 'N/A'}</p>
+                                                        <p><strong>Status:</strong> {seller.Construction_Status || 'N/A'}</p>
+                                                    </CardContent>
+                                                     <CardFooter className="flex flex-col items-stretch gap-2">
+                                                        <Button className="w-full" onClick={() => handleViewDetails(seller, 'Seller')}>View</Button>
+                                                        {user?.email === seller.Email && (
+                                                            <div className="flex w-full gap-2">
+                                                                <Button variant="outline" className="w-full" onClick={() => handleEditClick(seller, 'Seller')}>Edit</Button>
+                                                                <Button variant="destructive" className="w-full" onClick={() => handleDeleteClick(seller, 'Seller')}>Delete</Button>
+                                                            </div>
+                                                        )}
+                                                    </CardFooter>
+                                                </Card>
+                                            </motion.div>
+                                        );
+                                    })}
                                 </motion.div>
                             ) : (
                                 <div className="text-center py-12 text-muted-foreground">

@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import Image from 'next/image';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { FilterX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -222,25 +223,33 @@ export default function ListingsPage() {
                             initial="hidden"
                             animate="visible"
                         >
-                            {filteredListings.map((listing: any, index: number) => (
-                                <motion.div key={listing.id || index} variants={itemVariants}>
-                                    <Card className="h-full flex flex-col">
-                                        <CardHeader>
-                                            <CardTitle className="text-xl">{listing.Name || 'Unnamed Seller'}</CardTitle>
-                                            <CardDescription>{listing.Property_Type || 'N/A'}</CardDescription>
-                                        </CardHeader>
-                                        <CardContent className="space-y-1 text-sm flex-grow">
-                                            <p><strong>Location:</strong> {listing.Location_ || 'N/A'}</p>
-                                            <p><strong>Price:</strong> {listing.Price_Range || 'N/A'}</p>
-                                            <p><strong>Area:</strong> {listing.Area || 'N/A'}</p>
-                                            <p><strong>Status:</strong> {listing.Construction_Status || 'N/A'}</p>
-                                        </CardContent>
-                                        <CardFooter>
-                                            <Button className="w-full" onClick={() => handleViewDetails(listing)}>View Details</Button>
-                                        </CardFooter>
-                                    </Card>
-                                </motion.div>
-                            ))}
+                            {filteredListings.map((listing: any, index: number) => {
+                                const imageSrc = listing.image && !listing.image.startsWith('data:image') ? `data:image/jpeg;base64,${listing.image}` : listing.image;
+                                return (
+                                    <motion.div key={listing.id || index} variants={itemVariants}>
+                                        <Card className="h-full flex flex-col">
+                                            {imageSrc && (
+                                                <div className="aspect-video relative w-full overflow-hidden rounded-t-lg bg-muted">
+                                                    <Image src={imageSrc} alt={listing.Name || 'Property image'} fill className="object-cover" />
+                                                </div>
+                                            )}
+                                            <CardHeader>
+                                                <CardTitle className="text-xl">{listing.Name || 'Unnamed Seller'}</CardTitle>
+                                                <CardDescription>{listing.Property_Type || 'N/A'}</CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="space-y-1 text-sm flex-grow">
+                                                <p><strong>Location:</strong> {listing.Location_ || 'N/A'}</p>
+                                                <p><strong>Price:</strong> {listing.Price_Range || 'N/A'}</p>
+                                                <p><strong>Area:</strong> {listing.Area || 'N/A'}</p>
+                                                <p><strong>Status:</strong> {listing.Construction_Status || 'N/A'}</p>
+                                            </CardContent>
+                                            <CardFooter>
+                                                <Button className="w-full" onClick={() => handleViewDetails(listing)}>View Details</Button>
+                                            </CardFooter>
+                                        </Card>
+                                    </motion.div>
+                                );
+                            })}
                         </motion.div>
                     ) : (
                         <div className="text-center py-12 text-muted-foreground">
