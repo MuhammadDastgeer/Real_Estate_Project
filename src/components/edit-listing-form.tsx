@@ -101,9 +101,10 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
   const priceRanges = priceCurrency === 'USD' ? usdPriceRanges : pkrPriceRanges;
   const currentImage = form.watch('image');
   
-  const imageSrc = currentImage && typeof currentImage === 'string' && !currentImage.startsWith('data:image') 
-    ? `data:image/jpeg;base64,${currentImage}` 
-    : currentImage;
+  let imageSrc: string | null = null;
+  if (currentImage && typeof currentImage === 'string') {
+    imageSrc = currentImage.startsWith('data:image') ? currentImage : `data:image/jpeg;base64,${currentImage}`;
+  }
 
 
   useEffect(() => {
@@ -143,11 +144,18 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     setIsLoading(true);
     setShowPreview(false);
     try {
-      const { priceCurrency, areaUnit, ...rest } = formData;
+      const { image, ...rest } = formData;
+      
+      let imagePayload = image;
+      if (imagePayload && typeof imagePayload === 'string' && imagePayload.startsWith('data:image')) {
+        imagePayload = imagePayload.split(',')[1];
+      }
+
       const postData = {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
+        image: imagePayload,
       };
       const postDataWithId = { ...postData, id: listing.id };
 
@@ -168,7 +176,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Property_Type: formData.propertyType,
         Area: `${formData.area} ${formData.areaUnit}`,
         Construction_Status: formData.constructionStatus,
-        image: formData.image,
+        image: imagePayload,
       };
 
       onEditSuccess(updatedStateObject);
@@ -184,9 +192,10 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     }
   }
   
-  const previewImageSrc = formData?.image && !formData.image.startsWith('data:image') 
-    ? `data:image/jpeg;base64,${formData.image}` 
-    : formData?.image;
+  let previewImageSrc: string | null = null;
+  if (formData?.image && typeof formData.image === 'string') {
+    previewImageSrc = formData.image.startsWith('data:image') ? formData.image : `data:image/jpeg;base64,${formData.image}`;
+  }
 
   return (
     <>

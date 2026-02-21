@@ -113,11 +113,18 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
     setIsLoading(true);
     setShowPreview(false);
     try {
-      const { priceCurrency, areaUnit, ...rest } = formData;
+      const { image, ...rest } = formData;
+      
+      let imagePayload = image;
+      if (imagePayload && typeof imagePayload === 'string' && imagePayload.startsWith('data:image')) {
+        imagePayload = imagePayload.split(',')[1];
+      }
+
       const postData = {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
+        image: imagePayload
       };
 
       const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/add_seller', postData);
