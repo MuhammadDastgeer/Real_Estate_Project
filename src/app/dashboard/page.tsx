@@ -263,9 +263,10 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
-      if (listingToDelete.type === 'Seller' && listingToDelete.image) {
+      const imageUrl = listingToDelete.image || listingToDelete.Image;
+      if (listingToDelete.type === 'Seller' && imageUrl) {
         try {
-          const imageRef = ref(storage, listingToDelete.image);
+          const imageRef = ref(storage, imageUrl);
           await deleteObject(imageRef);
         } catch (e: any) {
           if (e.code !== 'storage/object-not-found') {
@@ -275,8 +276,8 @@ export default function DashboardPage() {
       }
 
       const payload: { id: string; image?: string } = { id: listingToDelete.id };
-      if (listingToDelete.type === 'Seller' && listingToDelete.image) {
-        payload.image = listingToDelete.image;
+      if (listingToDelete.type === 'Seller' && imageUrl) {
+        payload.image = imageUrl;
       }
       await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', payload);
       

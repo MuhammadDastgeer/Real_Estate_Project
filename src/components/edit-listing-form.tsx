@@ -90,6 +90,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
       const areaString = listing.Area || '';
       const detectedUnit = areaUnits.find(u => areaString.endsWith(u)) || 'sq ft';
       const areaValueOnly = detectedUnit ? areaString.replace(new RegExp(` ${detectedUnit}$`), '').trim() : areaString;
+      const imageUrl = listing.image || listing.Image;
 
       form.reset({
         name: listing.Name || '',
@@ -102,7 +103,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         area: areaValueOnly,
         areaUnit: detectedUnit as 'sq ft' | 'marla' | 'kanal',
         constructionStatus: listing.Construction_Status || 'Ready to move',
-        image: listing.image || undefined,
+        image: imageUrl || undefined,
       });
     }
   }, [listing, form]);
@@ -111,20 +112,23 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
   const priceRanges = priceCurrency === 'USD' ? usdPriceRanges : pkrPriceRanges;
   const currentImageFile = form.watch('image');
 
-  const [previewImage, setPreviewImage] = useState<string | null>(listing.image || null);
+  const existingImageUrl = listing.image || listing.Image;
+  const [previewImage, setPreviewImage] = useState<string | null>(existingImageUrl || null);
 
   useEffect(() => {
-    if (currentImageFile && currentImageFile.length > 0) {
+    if (currentImageFile && typeof currentImageFile !== 'string' && currentImageFile.length > 0) {
       const file = currentImageFile[0];
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
       };
       reader.readAsDataURL(file);
+    } else if (typeof currentImageFile === 'string') {
+        setPreviewImage(currentImageFile);
     } else if (!currentImageFile) {
-        setPreviewImage(listing.image || null)
+        setPreviewImage(existingImageUrl || null)
     }
-  }, [currentImageFile, listing.image]);
+  }, [currentImageFile, existingImageUrl]);
 
 
   useEffect(() => {
@@ -138,7 +142,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let imageFile: File | undefined = undefined;
-    let imageDataUrl: string | undefined = listing.image;
+    let imageDataUrl: string | undefined = existingImageUrl;
 
     if (data.image && typeof data.image !== 'string' && data.image.length > 0) {
         const file = data.image[0];
@@ -164,16 +168,16 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     setIsLoading(true);
     setShowPreview(false);
     try {
-      let imageUrl = listing.image || ''; // Keep old image URL if no new one
+      let imageUrl = existingImageUrl || ''; // Keep old image URL if no new one
 
       // if new image is uploaded and firebase is configured
       if (firebaseConfig.projectId !== "your-project-id" && formData.image instanceof File) {
           const newFile = formData.image;
 
           // Delete old image from storage if it exists
-          if (listing.image) {
+          if (existingImageUrl) {
               try {
-                  const oldImageRef = ref(storage, listing.image);
+                  const oldImageRef = ref(storage, existingImageUrl);
                   await deleteObject(oldImageRef);
               } catch(e: any) {
                   if (e.code !== 'storage/object-not-found') {
