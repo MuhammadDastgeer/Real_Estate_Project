@@ -10,13 +10,17 @@ import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 
-const navLinks = [
+const navLinksConfig = [
   { href: '/', label: 'Home' },
+  { href: '/listings', label: 'Listings' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
   { href: '/connect-agent', label: 'Connect with an Agent' },
   { href: '/dashboard', label: 'Dashboard' },
+  { href: '/add-buyer', label: 'New Buyer', authRequired: true },
+  { href: '/add-seller', label: 'New Seller', authRequired: true },
 ];
+
 
 interface User {
   name: string;
@@ -68,6 +72,8 @@ export default function Header() {
     setIsMenuOpen(false);
     router.push('/login');
   }
+
+  const navLinks = navLinksConfig.filter(link => !link.authRequired || user);
 
   return (
     <header
