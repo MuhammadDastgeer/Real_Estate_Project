@@ -100,6 +100,10 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
   const priceCurrency = form.watch('priceCurrency');
   const priceRanges = priceCurrency === 'USD' ? usdPriceRanges : pkrPriceRanges;
   const currentImage = form.watch('image');
+  
+  const imageSrc = currentImage && typeof currentImage === 'string' && !currentImage.startsWith('data:image') 
+    ? `data:image/jpeg;base64,${currentImage}` 
+    : currentImage;
 
 
   useEffect(() => {
@@ -179,6 +183,10 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
       setFormData(null);
     }
   }
+  
+  const previewImageSrc = formData?.image && !formData.image.startsWith('data:image') 
+    ? `data:image/jpeg;base64,${formData.image}` 
+    : formData?.image;
 
   return (
     <>
@@ -398,9 +406,9 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
                       render={({ field: { onChange, value, ...rest } }) => (
                         <FormItem>
                           <FormLabel>Property Image (leave blank to keep existing)</FormLabel>
-                          {currentImage && typeof currentImage === 'string' && (
+                          {imageSrc && typeof imageSrc === 'string' && (
                               <div className="mt-2">
-                                  <Image src={currentImage} alt="Current property image" width={200} height={150} className="rounded-md object-cover" />
+                                  <Image src={imageSrc} alt="Current property image" width={200} height={150} className="rounded-md object-cover" />
                               </div>
                           )}
                           <FormControl>
@@ -436,9 +444,9 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
           </AlertDialogHeader>
           {formData && (
             <div className="space-y-4 text-sm text-muted-foreground">
-                {formData.image && (
+                {previewImageSrc && (
                     <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
-                        <Image src={formData.image} alt="Property preview" fill className="object-cover" />
+                        <Image src={previewImageSrc} alt="Property preview" fill className="object-cover" />
                     </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
