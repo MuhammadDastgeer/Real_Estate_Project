@@ -21,6 +21,14 @@ import { ListingDetailsDialog } from '@/components/listing-details-dialog';
 import { EditListingForm } from '@/components/edit-listing-form';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getStorage, ref, deleteObject } from 'firebase/storage';
+import { firebaseConfig } from '@/firebase/config';
+
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+const storage = getStorage();
 
 interface User {
     name: string;
@@ -255,6 +263,17 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
+      if (listingToDelete.type === 'Seller' && listingToDelete.image) {
+        try {
+          const imageRef = ref(storage, listingToDelete.image);
+          await deleteObject(imageRef);
+        } catch (e: any) {
+          if (e.code !== 'storage/object-not-found') {
+            console.warn("Could not delete image from storage", e);
+          }
+        }
+      }
+
       const payload: { id: string; image?: string } = { id: listingToDelete.id };
       if (listingToDelete.type === 'Seller' && listingToDelete.image) {
         payload.image = listingToDelete.image;

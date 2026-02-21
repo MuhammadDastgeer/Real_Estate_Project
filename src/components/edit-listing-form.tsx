@@ -18,6 +18,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { firebaseConfig } from '@/firebase/config';
+
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+const storage = getStorage();
+
 const usdPriceRanges = [
   '50,000 - 100,000',
   '100,001 - 250,000',
@@ -52,7 +61,8 @@ const formSchema = z.object({
 });
 
 interface ProcessedFormData extends Omit<z.infer<typeof formSchema>, 'image'> {
-    image?: string;
+    image?: File;
+    imageDataUrl?: string;
 }
 
 interface EditListingFormProps {
@@ -99,12 +109,22 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
 
   const priceCurrency = form.watch('priceCurrency');
   const priceRanges = priceCurrency === 'USD' ? usdPriceRanges : pkrPriceRanges;
-  const currentImage = form.watch('image');
-  
-  let imageSrc: string | null = null;
-  if (currentImage && typeof currentImage === 'string') {
-    imageSrc = currentImage.startsWith('data:image') ? currentImage : `data:image/jpeg;base64,${currentImage}`;
-  }
+  const currentImageFile = form.watch('image');
+
+  const [previewImage, setPreviewImage] = useState<string | null>(listing.image || null);
+
+  useEffect(() => {
+    if (currentImageFile && currentImageFile.length > 0) {
+      const file = currentImageFile[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else if (!currentImageFile) {
+        setPreviewImage(listing.image || null)
+    }
+  }, [currentImageFile, listing.image]);
 
 
   useEffect(() => {
@@ -117,7 +137,8 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
   }, [form]);
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
-    let imageDataUrl: string | undefined = listing.image; 
+    let imageFile: File | undefined = undefined;
+    let imageDataUrl: string | undefined = listing.image;
 
     if (data.image && typeof data.image !== 'string' && data.image.length > 0) {
         const file = data.image[0];
@@ -125,17 +146,16 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
             form.setError('image', { type: 'manual', message: 'Image size cannot exceed 5MB.' });
             return;
         }
+        imageFile = file;
         imageDataUrl = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result as string);
             reader.onerror = reject;
             reader.readAsDataURL(file);
         });
-    } else if (typeof data.image === 'string') {
-        imageDataUrl = data.image;
     }
 
-    setFormData({ ...data, image: imageDataUrl });
+    setFormData({ ...data, image: imageFile, imageDataUrl });
     setShowPreview(true);
   }
 
@@ -144,18 +164,36 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
     setIsLoading(true);
     setShowPreview(false);
     try {
-      const { image, ...rest } = formData;
-      
-      let imagePayload = image;
-      if (imagePayload && typeof imagePayload === 'string' && imagePayload.startsWith('data:image')) {
-        imagePayload = imagePayload.split(',')[1];
+      let imageUrl = listing.image || ''; // Keep old image URL if no new one
+
+      // if new image is uploaded
+      if (formData.image instanceof File) {
+          const newFile = formData.image;
+
+          // Delete old image from storage if it exists
+          if (listing.image) {
+              try {
+                  const oldImageRef = ref(storage, listing.image);
+                  await deleteObject(oldImageRef);
+              } catch(e: any) {
+                  if (e.code !== 'storage/object-not-found') {
+                    console.warn("Could not delete old image from storage", e);
+                  }
+              }
+          }
+
+          // Upload new image
+          const newImageRef = ref(storage, `seller-images/${Date.now()}_${newFile.name}`);
+          await uploadBytes(newImageRef, newFile);
+          imageUrl = await getDownloadURL(newImageRef);
       }
 
+      const { image, imageDataUrl, ...rest } = formData;
       const postData = {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
-        image: imagePayload,
+        image: imageUrl,
       };
       const postDataWithId = { ...postData, id: listing.id };
 
@@ -176,7 +214,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Property_Type: formData.propertyType,
         Area: `${formData.area} ${formData.areaUnit}`,
         Construction_Status: formData.constructionStatus,
-        image: imagePayload,
+        image: imageUrl,
       };
 
       onEditSuccess(updatedStateObject);
@@ -190,11 +228,6 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
       setIsLoading(false);
       setFormData(null);
     }
-  }
-  
-  let previewImageSrc: string | null = null;
-  if (formData?.image && typeof formData.image === 'string') {
-    previewImageSrc = formData.image.startsWith('data:image') ? formData.image : `data:image/jpeg;base64,${formData.image}`;
   }
 
   return (
@@ -415,9 +448,9 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
                       render={({ field: { onChange, value, ...rest } }) => (
                         <FormItem>
                           <FormLabel>Property Image (leave blank to keep existing)</FormLabel>
-                          {imageSrc && typeof imageSrc === 'string' && (
+                           {previewImage && (
                               <div className="mt-2">
-                                  <Image src={imageSrc} alt="Current property image" width={200} height={150} className="rounded-md object-cover" />
+                                  <Image src={previewImage} alt="Current property image" width={200} height={150} className="rounded-md object-cover" />
                               </div>
                           )}
                           <FormControl>
@@ -453,9 +486,9 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
           </AlertDialogHeader>
           {formData && (
             <div className="space-y-4 text-sm text-muted-foreground">
-                {previewImageSrc && (
+                {formData.imageDataUrl && (
                     <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
-                        <Image src={previewImageSrc} alt="Property preview" fill className="object-cover" />
+                        <Image src={formData.imageDataUrl} alt="Property preview" fill className="object-cover" />
                     </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">

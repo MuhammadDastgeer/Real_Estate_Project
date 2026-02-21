@@ -18,6 +18,16 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
 
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { firebaseConfig } from '@/firebase/config';
+
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+const storage = getStorage();
+
+
 const usdPriceRanges = [
   '50,000 - 100,000',
   '100,001 - 250,000',
@@ -49,7 +59,8 @@ const formSchema = z.object({
 });
 
 interface ProcessedFormData extends Omit<z.infer<typeof formSchema>, 'image'> {
-    image?: string;
+    image?: File;
+    imageDataUrl?: string;
 }
 
 interface AddSellerFormProps {
@@ -90,12 +101,15 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     let imageDataUrl: string | undefined = undefined;
+    let imageFile: File | undefined = undefined;
+
     if (data.image && data.image.length > 0) {
         const file = data.image[0];
         if (file.size > 5 * 1024 * 1024) { // 5MB limit
             form.setError('image', { type: 'manual', message: 'Image size cannot exceed 5MB.' });
             return;
         }
+        imageFile = file;
         imageDataUrl = await new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onloadend = () => resolve(reader.result as string);
@@ -104,7 +118,7 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
         });
     }
 
-    setFormData({ ...data, image: imageDataUrl });
+    setFormData({ ...data, image: imageFile, imageDataUrl });
     setShowPreview(true);
   }
 
@@ -113,18 +127,21 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
     setIsLoading(true);
     setShowPreview(false);
     try {
-      const { image, ...rest } = formData;
-      
-      let imagePayload = image;
-      if (imagePayload && typeof imagePayload === 'string' && imagePayload.startsWith('data:image')) {
-        imagePayload = imagePayload.split(',')[1];
+      let imageUrl = '';
+      if (formData.image instanceof File) {
+        const file = formData.image;
+        const storageRef = ref(storage, `seller-images/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
       }
 
+      const { image, imageDataUrl, priceCurrency, areaUnit, ...rest } = formData;
+      
       const postData = {
         ...rest,
         priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
         area: `${formData.area} ${formData.areaUnit}`,
-        image: imagePayload
+        image: imageUrl
       };
 
       const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/add_seller', postData);
@@ -394,9 +411,9 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
           </AlertDialogHeader>
           {formData && (
             <div className="space-y-4 text-sm text-muted-foreground">
-                {formData.image && (
+                {formData.imageDataUrl && (
                     <div className="aspect-video relative w-full overflow-hidden rounded-lg bg-muted border">
-                        <Image src={formData.image} alt="Property preview" fill className="object-cover" />
+                        <Image src={formData.imageDataUrl} alt="Property preview" fill className="object-cover" />
                     </div>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
