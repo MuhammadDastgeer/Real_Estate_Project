@@ -66,10 +66,10 @@ export default function Features() {
               key={feature.title}
               variants={itemVariants}
             >
-              <Card className="h-full text-center hover:shadow-xl transition-shadow duration-300">
+              <Card className="h-full text-center hover:shadow-xl transition-shadow duration-300 group">
                 <CardHeader>
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
-                    <feature.icon className="h-6 w-6 text-primary" />
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4 transition-transform group-hover:scale-110">
+                    <feature.icon className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" />
                   </div>
                   <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>

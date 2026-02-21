@@ -113,10 +113,10 @@ export default function AboutPage() {
             <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
                 {values.map((value, index) => (
                     <motion.div key={index} variants={itemVariants}>
-                        <Card className="text-center h-full">
+                        <Card className="text-center h-full group">
                             <CardContent className="p-6">
-                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                                    <value.icon className="h-6 w-6 text-primary" />
+                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 transition-transform group-hover:scale-110">
+                                    <value.icon className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" />
                                 </div>
                                 <h3 className="text-xl font-semibold">{value.title}</h3>
                                 <p className="mt-2 text-muted-foreground">{value.description}</p>

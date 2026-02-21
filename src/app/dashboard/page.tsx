@@ -637,10 +637,10 @@ const filteredSellerListings = useMemo(() => {
                     variants={itemVariants}
                     className="h-full"
                     >
-                    <Card className="h-full flex flex-col">
+                    <Card className="h-full flex flex-col group">
                         <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                        <div className="rounded-full bg-primary/10 p-3">
-                            <card.icon className="h-6 w-6 text-primary" />
+                        <div className="rounded-full bg-primary/10 p-3 transition-transform group-hover:scale-110">
+                            <card.icon className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" />
                         </div>
                         <div>
                             <CardTitle className="text-xl">{card.title}</CardTitle>
@@ -795,10 +795,10 @@ const filteredSellerListings = useMemo(() => {
                     variants={itemVariants}
                     className="h-full"
                   >
-                    <Card className="h-full flex flex-col">
+                    <Card className="h-full flex flex-col group">
                       <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                        <div className="rounded-full bg-primary/10 p-3">
-                          <card.icon className="h-6 w-6 text-primary" />
+                        <div className="rounded-full bg-primary/10 p-3 transition-transform group-hover:scale-110">
+                          <card.icon className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" />
                         </div>
                         <div>
                           <CardTitle className="text-xl">{card.title}</CardTitle>
@@ -1228,10 +1228,10 @@ const filteredSellerListings = useMemo(() => {
                   variants={itemVariants}
                   className="h-full"
                 >
-                  <Card className="h-full flex flex-col">
+                  <Card className="h-full flex flex-col group">
                     <CardHeader className="flex flex-row items-center gap-4 space-y-0">
-                      <div className="rounded-full bg-primary/10 p-3">
-                        <card.icon className="h-6 w-6 text-primary" />
+                      <div className="rounded-full bg-primary/10 p-3 transition-transform group-hover:scale-110">
+                        <card.icon className="h-6 w-6 text-primary transition-transform group-hover:rotate-12" />
                       </div>
                       <div>
                         <CardTitle className="text-xl">{card.title}</CardTitle>

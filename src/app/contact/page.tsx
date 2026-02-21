@@ -64,22 +64,22 @@ export default function ContactPage() {
         >
             <h2 className="text-2xl font-bold">Contact Information</h2>
             <div className="space-y-4 text-muted-foreground">
-                <div className="flex items-start gap-4">
-                    <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-4 group">
+                    <MapPin className="h-6 w-6 text-primary flex-shrink-0 mt-1 transition-transform group-hover:scale-125 group-hover:rotate-[-12deg]" />
                     <div>
                         <h3 className="font-semibold text-foreground">Our Office</h3>
                         <p>123 Main Street, Anytown, USA 12345</p>
                     </div>
                 </div>
-                <div className="flex items-start gap-4">
-                    <Mail className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-4 group">
+                    <Mail className="h-6 w-6 text-primary flex-shrink-0 mt-1 transition-transform group-hover:scale-125 group-hover:rotate-12" />
                     <div>
                         <h3 className="font-semibold text-foreground">Email Us</h3>
                         <a href="mailto:info@estately.com" className="hover:text-primary">info@estately.com</a>
                     </div>
                 </div>
-                <div className="flex items-start gap-4">
-                    <Phone className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex items-start gap-4 group">
+                    <Phone className="h-6 w-6 text-primary flex-shrink-0 mt-1 transition-transform group-hover:scale-125 group-hover:rotate-12" />
                     <div>
                         <h3 className="font-semibold text-foreground">Call Us</h3>
                         <a href="tel:+1234567890" className="hover:text-primary">(123) 456-7890</a>
