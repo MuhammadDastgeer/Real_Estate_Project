@@ -63,7 +63,7 @@ export default function SignupPage() {
     setIsLoading(true);
     try {
       const { confirmPassword, ...postData } = data;
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook/signup', postData);
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/signup', postData);
       toast({
         description: response.data?.message || JSON.stringify(response.data, null, 2),
       });
