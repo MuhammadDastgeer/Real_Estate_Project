@@ -83,7 +83,7 @@ export default function SignupPage() {
   async function onVerificationSubmit(data: VerificationFormData) {
     setIsLoading(true);
     try {
-        const response = await axios.post('https://n8n-7k47.onrender.com/webhook/verify-email', {
+        const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/verify-email', {
             email: userEmail,
             code: data.code,
         });
