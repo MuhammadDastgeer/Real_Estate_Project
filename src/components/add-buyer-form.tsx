@@ -100,7 +100,7 @@ export function AddBuyerForm({ onBack }: AddBuyerFormProps) {
         area: `${formData.area} ${formData.areaUnit}`,
       };
 
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/add_user', postData);
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook/add_user', postData);
       toast({
         title: "Success!",
         description: "Buyer information submitted successfully.",

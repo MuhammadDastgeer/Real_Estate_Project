@@ -254,7 +254,7 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
-      await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_delete', { id: listingToDelete.id });
+      await axios.post('https://n8n-7k47.onrender.com/webhook/card_delete', { id: listingToDelete.id });
       
       toast({
         title: "Success!",
@@ -308,7 +308,7 @@ export default function DashboardPage() {
       setListingsLoading(true);
       setListings(null);
       try {
-        const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_buyer', {});
+        const response = await axios.post('https://n8n-7k47.onrender.com/webhook/get_buyer', {});
         
         if (response.data && Array.isArray(response.data)) {
           const buyers = response.data.map(item => item.json || item);
@@ -391,7 +391,7 @@ export default function DashboardPage() {
         setListingsLoading(true);
         setListings(null);
         try {
-            const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_buyer', {});
+            const response = await axios.post('https://n8n-7k47.onrender.com/webhook/get_buyer', {});
             
             if (response.data && Array.isArray(response.data)) {
                 const buyers = response.data.map(item => item.json || item);

@@ -136,7 +136,7 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
         }
       }
 
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/Check_Price', payload);
+      const response = await axios.post('https://n8n-7k47.onrender.com/webhook/Check_Price', payload);
       setResult(response.data);
       toast({
         title: "Success!",

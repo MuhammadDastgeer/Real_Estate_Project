@@ -122,7 +122,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
       };
       const postDataWithId = { ...postData, id: listing.id };
 
-      await axios.post('https://n8n-7k47.onrender.com/webhook-test/card_edit', postDataWithId);
+      await axios.post('https://n8n-7k47.onrender.com/webhook/card_edit', postDataWithId);
       
       toast({
         title: "Success!",
