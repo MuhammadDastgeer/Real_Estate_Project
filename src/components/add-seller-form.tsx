@@ -94,12 +94,15 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
     setIsLoading(true);
     setShowPreview(false);
     try {
-      const { priceCurrency, areaUnit, ...rest } = formData;
-      
       const postData = {
-        ...rest,
-        priceRange: `${formData.priceRange} ${formData.priceCurrency}`,
-        area: `${formData.area} ${formData.areaUnit}`,
+        Name: formData.name,
+        Email: formData.email,
+        Phone_Number: formData.phoneNumber,
+        Location_: formData.location,
+        Price_Range: `${formData.priceRange} ${formData.priceCurrency}`,
+        Property_Type: formData.propertyType,
+        Area: `${formData.area} ${formData.areaUnit}`,
+        Construction_Status: formData.constructionStatus,
       };
 
       const response = await axios.post('https://n8n-7k47.onrender.com/webhook/add_seller', postData);
