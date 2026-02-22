@@ -71,7 +71,7 @@ export default function ListingsPage() {
         const fetchListings = async () => {
             setLoading(true);
             try {
-                const response = await axios.post('https://n8n-7k47.onrender.com/webhook-test/get_seller', {});
+                const response = await axios.post('https://n8n-7k47.onrender.com/webhook/get_seller', {});
                 if (response.data && Array.isArray(response.data)) {
                     const sellers = response.data.map(item => item.json || item);
                     setListings(sellers);
