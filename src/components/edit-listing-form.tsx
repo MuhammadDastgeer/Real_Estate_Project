@@ -65,17 +65,29 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phoneNumber: '',
+      location: '',
+      priceRange: '',
+      priceCurrency: 'USD',
+      propertyType: 'House',
+      area: '',
+      areaUnit: 'sq ft',
+      constructionStatus: 'Ready to move',
+    },
   });
 
   useEffect(() => {
     if (listing) {
       const priceString = listing.Price_Range || '';
-      const detectedCurrency = currencies.find(c => priceString.endsWith(c)) || 'USD';
-      const priceRangeValue = detectedCurrency ? priceString.replace(new RegExp(` ${detectedCurrency}$`), '').trim() : priceString;
+      const detectedCurrency = (currencies.find(c => priceString.endsWith(c)) || 'USD') as 'USD' | 'PKR';
+      const priceRangeValue = priceString.replace(new RegExp(` ${detectedCurrency}$`), '').trim();
       
       const areaString = listing.Area || '';
-      const detectedUnit = areaUnits.find(u => areaString.endsWith(u)) || 'sq ft';
-      const areaValueOnly = detectedUnit ? areaString.replace(new RegExp(` ${detectedUnit}$`), '').trim() : areaString;
+      const detectedUnit = (areaUnits.find(u => areaString.endsWith(u)) || 'sq ft') as 'sq ft' | 'marla' | 'kanal';
+      const areaValueOnly = areaString.replace(new RegExp(` ${detectedUnit}$`), '').trim();
 
       form.reset({
         name: listing.Name || '',
@@ -83,10 +95,10 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         phoneNumber: listing.Phone_Number || '',
         location: listing.Location_ || '',
         priceRange: priceRangeValue,
-        priceCurrency: detectedCurrency as 'USD' | 'PKR',
+        priceCurrency: detectedCurrency,
         propertyType: listing.Property_Type || 'House',
         area: areaValueOnly,
-        areaUnit: detectedUnit as 'sq ft' | 'marla' | 'kanal',
+        areaUnit: detectedUnit,
         constructionStatus: listing.Construction_Status || 'Ready to move',
       });
     }
