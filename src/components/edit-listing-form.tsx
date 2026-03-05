@@ -126,7 +126,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Construction_Status: formData.constructionStatus,
       };
 
-      await axios.post('https://n8n-7k47.onrender.com/webhook/card_edit', postData);
+      await axios.post('https://tp34kmg4.rcld.app/webhook-test/card_edit', postData);
       
       toast({
         title: "Success!",
