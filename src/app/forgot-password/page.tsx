@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -67,7 +66,7 @@ export default function ForgotPasswordPage() {
   async function onEmailSubmit(data: EmailFormData) {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://n8n-7k47.onrender.com/webhook/forgot-password', data);
+      const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/forgot-password', data);
       toast({
         description: response.data?.message || JSON.stringify(response.data, null, 2),
       });
@@ -87,7 +86,7 @@ export default function ForgotPasswordPage() {
   async function onCodeSubmit(data: CodeFormData) {
     setIsLoading(true);
     try {
-        const response = await axios.post('https://n8n-7k47.onrender.com/webhook/verify-reset-code', {
+        const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/verify-reset-code', {
             email: userEmail,
             code: data.code,
         });
@@ -109,7 +108,7 @@ export default function ForgotPasswordPage() {
   async function onPasswordSubmit(data: PasswordFormData) {
     setIsLoading(true);
     try {
-        const response = await axios.post('https://n8n-7k47.onrender.com/webhook/reset-password', {
+        const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/reset-password', {
             email: userEmail,
             password: data.password,
         });
