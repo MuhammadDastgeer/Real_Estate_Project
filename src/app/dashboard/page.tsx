@@ -254,9 +254,11 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
+      // Use the updated webhook endpoint for delete and include Type information
       await axios.post('https://n8n-7k47.onrender.com/webhook/card_delete', { 
         id: listingToDelete.id,
-        Type: listingToDelete.type
+        Type: listingToDelete.type,
+        type: listingToDelete.type
       });
       
       toast({

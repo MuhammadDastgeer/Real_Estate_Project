@@ -137,6 +137,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Area: `${formData.area} ${formData.areaUnit}`,
         Construction_Status: formData.constructionStatus,
         Type: listing.type,
+        type: listing.type,
       };
 
       await axios.post('https://tp34kmg4.rcld.app/webhook-test/card_edit', postData);
@@ -146,10 +147,8 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         description: "Listing updated successfully.",
       });
 
-      const updatedListingData = { ...listing };
-
       const updatedStateObject = {
-        ...updatedListingData,
+        ...listing,
         Name: formData.name,
         Email: formData.email,
         Phone_Number: formData.phoneNumber,
