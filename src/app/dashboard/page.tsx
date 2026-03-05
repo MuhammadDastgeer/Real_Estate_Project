@@ -254,8 +254,7 @@ export default function DashboardPage() {
 
     setIsDeleting(true);
     try {
-      // Use the updated webhook endpoint for delete and include Type information
-      await axios.post('https://n8n-7k47.onrender.com/webhook/card_delete', { 
+      await axios.post('https://tp34kmg4.rcld.app/webhook-test/card_delete', { 
         id: listingToDelete.id,
         Type: listingToDelete.type,
         type: listingToDelete.type
@@ -567,7 +566,7 @@ const filteredSellerListings = useMemo(() => {
               <div className="space-y-2">
                 <Skeleton className="h-6 w-24" />
               </div>
-            </CardHeader>
+            </Header>
             <CardContent>
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-2/3 mt-2" />
