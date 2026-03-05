@@ -566,7 +566,7 @@ const filteredSellerListings = useMemo(() => {
               <div className="space-y-2">
                 <Skeleton className="h-6 w-24" />
               </div>
-            </Header>
+            </CardHeader>
             <CardContent>
               <Skeleton className="h-4 w-full" />
               <Skeleton className="h-4 w-2/3 mt-2" />
