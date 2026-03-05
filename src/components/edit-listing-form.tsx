@@ -66,16 +66,16 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      phoneNumber: '',
-      location: '',
+      name: listing?.Name || '',
+      email: listing?.Email || '',
+      phoneNumber: listing?.Phone_Number || '',
+      location: listing?.Location_ || '',
       priceRange: '',
       priceCurrency: 'USD',
-      propertyType: 'House',
+      propertyType: listing?.Property_Type || 'House',
       area: '',
       areaUnit: 'sq ft',
-      constructionStatus: 'Ready to move',
+      constructionStatus: listing?.Construction_Status || 'Ready to move',
     },
   });
 
@@ -136,6 +136,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         Property_Type: formData.propertyType,
         Area: `${formData.area} ${formData.areaUnit}`,
         Construction_Status: formData.constructionStatus,
+        Type: listing.type,
       };
 
       await axios.post('https://tp34kmg4.rcld.app/webhook-test/card_edit', postData);
