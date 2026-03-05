@@ -320,7 +320,7 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
                                 <FormLabel className="font-normal">
                                 Ready to move
                                 </FormLabel>
-                            </ProjectItem>
+                            </FormItem>
                             <FormItem className="flex items-center space-x-3 space-y-0">
                                 <FormControl>
                                 <RadioGroupItem value="Under construction" />
