@@ -71,7 +71,7 @@ export default function ListingsPage() {
         const fetchListings = async () => {
             setLoading(true);
             try {
-                const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/get_seller', {});
+                const response = await axios.post('https://tp34kmg4.rcld.app/webhook/get_seller', {});
                 if (response.data && Array.isArray(response.data)) {
                     const sellers = response.data.map(item => item.json || item);
                     setListings(sellers);
@@ -224,7 +224,7 @@ export default function ListingsPage() {
                             animate="visible"
                         >
                             {filteredListings.map((listing: any, index: number) => (
-                                    <motion.div key={`listing-${listing.id || index}`} variants={itemVariants}>
+                                    <motion.div key={`listing-${listing.id}-${index}`} variants={itemVariants}>
                                         <Card className="h-full flex flex-col overflow-hidden">
                                             <CardHeader>
                                                 <CardTitle className="text-xl">{listing.Name || 'Unnamed Seller'}</CardTitle>

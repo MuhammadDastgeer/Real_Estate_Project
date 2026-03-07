@@ -352,7 +352,7 @@ export default function DashboardPage() {
       setSellerListingsLoading(true);
       setSellerListings(null);
       try {
-        const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/get_seller', {});
+        const response = await axios.post('https://tp34kmg4.rcld.app/webhook/get_seller', {});
         
         if (response.data && Array.isArray(response.data)) {
           const sellers = response.data.map(item => item.json || item);
@@ -438,7 +438,7 @@ useEffect(() => {
         setSellerListingsLoading(true);
         setSellerListings(null);
         try {
-            const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/get_seller', {});
+            const response = await axios.post('https://tp34kmg4.rcld.app/webhook/get_seller', {});
             
             if (response.data && Array.isArray(response.data)) {
                 const sellers = response.data.map(item => item.json || item);
@@ -876,7 +876,7 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {sellerListings.map((seller: any, index: number) => (
-                                            <motion.div key={`seller-explore-${seller.id || index}`} variants={itemVariants}>
+                                            <motion.div key={`seller-explore-${seller.id}-${index}`} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col overflow-hidden">
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
@@ -1025,7 +1025,7 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {filteredBuyerListings.map((buyer: any, index: number) => (
-                                        <motion.div key={`buyer-list-${buyer.id || index}`} variants={itemVariants}>
+                                        <motion.div key={`buyer-list-${buyer.id}-${index}`} variants={itemVariants}>
                                             <Card className="h-full flex flex-col">
                                                 <CardHeader>
                                                     <CardTitle className="text-xl">{buyer.Name || 'Unnamed Buyer'}</CardTitle>
@@ -1159,7 +1159,7 @@ const filteredSellerListings = useMemo(() => {
                                 >
                                     {filteredSellerListings.map((seller: any, index: number) => {
                                         return (
-                                            <motion.div key={`seller-list-${seller.id || index}`} variants={itemVariants}>
+                                            <motion.div key={`seller-list-${seller.id}-${index}`} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col overflow-hidden">
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
