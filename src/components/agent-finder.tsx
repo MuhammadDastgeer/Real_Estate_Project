@@ -40,7 +40,7 @@ export function AgentFinder() {
     setResults(null);
     try {
       const response = await axios.post(
-        "https://tp34kmg4.rcld.app/webhook-test/chatbot",
+        "https://tp34kmg4.rcld.app/webhook/chatbot",
         data
       );
       setResults(response.data);
@@ -200,7 +200,7 @@ export function AgentFinder() {
                         <CardTitle>Response</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                        <pre className="whitespace-pre-wrap break-all">{JSON.stringify(results, null, 2)}</pre>
+                        <pre className="whitespace-pre-wrap break-all bg-muted p-4 rounded-md">{JSON.stringify(results, null, 2)}</pre>
                     </CardContent>
                 </Card>
             )}
