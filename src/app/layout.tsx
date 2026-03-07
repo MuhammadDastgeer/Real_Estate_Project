@@ -52,7 +52,7 @@ export default function RootLayout({
             __html: `
               import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/dist/chat.bundle.es.js';
               createChat({
-                webhookUrl: 'https://n8n-7k47.onrender.com/webhook/bbcdcb38-560e-4b17-a7e8-fb8fa101635f/chat'
+                webhookUrl: 'https://tp34kmg4.rcld.app/webhook/bbcdcb38-560e-4b17-a7e8-fb8fa101635f/chat'
               });
             `,
           }}
