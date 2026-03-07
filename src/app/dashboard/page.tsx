@@ -312,7 +312,7 @@ export default function DashboardPage() {
       setListingsLoading(true);
       setListings(null);
       try {
-        const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/get_buyer', {});
+        const response = await axios.post('https://tp34kmg4.rcld.app/webhook/get_buyer', {});
         
         if (response.data && Array.isArray(response.data)) {
           const buyers = response.data.map(item => item.json || item);
@@ -395,7 +395,7 @@ export default function DashboardPage() {
         setListingsLoading(true);
         setListings(null);
         try {
-            const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/get_buyer', {});
+            const response = await axios.post('https://tp34kmg4.rcld.app/webhook/get_buyer', {});
             
             if (response.data && Array.isArray(response.data)) {
                 const buyers = response.data.map(item => item.json || item);
