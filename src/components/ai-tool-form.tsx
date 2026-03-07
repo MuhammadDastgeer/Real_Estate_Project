@@ -81,7 +81,6 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
   });
 
   const currency = form.watch('currency');
-  const priceRanges = currency === 'USD' ? usdPriceRanges : pkrPriceRanges;
 
   useEffect(() => {
     if (isPriceTool && form.getValues('prompt')) {
@@ -136,7 +135,7 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
         }
       }
 
-      const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/Check_Price', payload);
+      const response = await axios.post('https://tp34kmg4.rcld.app/webhook/Check_Price', payload);
       setResult(response.data);
       toast({
         title: "Success!",
@@ -152,6 +151,8 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
       setIsLoading(false);
     }
   };
+
+  const priceRanges = currency === 'USD' ? usdPriceRanges : pkrPriceRanges;
 
   return (
     <>
@@ -244,7 +245,7 @@ export function AIToolForm({ title, description, onBack }: AIToolFormProps) {
                                                 <SelectItem key={range} value={range}>{range}</SelectItem>
                                             ))}
                                         </SelectContent>
-                                    </Select>
+                                     </Select>
                                     <FormMessage />
                                 </FormItem>
                             )}
