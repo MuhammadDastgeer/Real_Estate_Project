@@ -224,7 +224,7 @@ export default function ListingsPage() {
                             animate="visible"
                         >
                             {filteredListings.map((listing: any, index: number) => (
-                                    <motion.div key={listing.id || index} variants={itemVariants}>
+                                    <motion.div key={`listing-${listing.id || index}`} variants={itemVariants}>
                                         <Card className="h-full flex flex-col overflow-hidden">
                                             <CardHeader>
                                                 <CardTitle className="text-xl">{listing.Name || 'Unnamed Seller'}</CardTitle>

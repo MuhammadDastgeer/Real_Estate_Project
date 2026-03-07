@@ -718,7 +718,7 @@ const filteredSellerListings = useMemo(() => {
                                   animate="visible"
                               >
                                   {listings.map((buyer: any, index: number) => (
-                                      <motion.div key={buyer.id || index} variants={itemVariants}>
+                                      <motion.div key={`buyer-explore-${buyer.id || index}`} variants={itemVariants}>
                                           <Card className="h-full flex flex-col">
                                               <CardHeader>
                                                   <CardTitle className="text-xl">{buyer.Name || 'Unnamed Buyer'}</CardTitle>
@@ -876,7 +876,7 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {sellerListings.map((seller: any, index: number) => (
-                                            <motion.div key={seller.id || index} variants={itemVariants}>
+                                            <motion.div key={`seller-explore-${seller.id || index}`} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col overflow-hidden">
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
@@ -1025,7 +1025,7 @@ const filteredSellerListings = useMemo(() => {
                                     animate="visible"
                                 >
                                     {filteredBuyerListings.map((buyer: any, index: number) => (
-                                        <motion.div key={buyer.id || index} variants={itemVariants}>
+                                        <motion.div key={`buyer-list-${buyer.id || index}`} variants={itemVariants}>
                                             <Card className="h-full flex flex-col">
                                                 <CardHeader>
                                                     <CardTitle className="text-xl">{buyer.Name || 'Unnamed Buyer'}</CardTitle>
@@ -1159,7 +1159,7 @@ const filteredSellerListings = useMemo(() => {
                                 >
                                     {filteredSellerListings.map((seller: any, index: number) => {
                                         return (
-                                            <motion.div key={seller.id || index} variants={itemVariants}>
+                                            <motion.div key={`seller-list-${seller.id || index}`} variants={itemVariants}>
                                                 <Card className="h-full flex flex-col overflow-hidden">
                                                     <CardHeader>
                                                         <CardTitle className="text-xl">{seller.Name || 'Unnamed Seller'}</CardTitle>
