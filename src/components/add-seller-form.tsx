@@ -105,7 +105,7 @@ export function AddSellerForm({ onBack }: AddSellerFormProps) {
         Construction_Status: formData.constructionStatus,
       };
 
-      const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/add_seller', postData);
+      const response = await axios.post('https://tp34kmg4.rcld.app/webhook/add_seller', postData);
       toast({
         title: "Success!",
         description: "Seller information submitted successfully.",
