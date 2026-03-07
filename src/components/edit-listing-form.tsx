@@ -140,7 +140,7 @@ export function EditListingForm({ listing, onBack, onEditSuccess }: EditListingF
         type: listing.type,
       };
 
-      await axios.post('https://tp34kmg4.rcld.app/webhook-test/card_edit', postData);
+      await axios.post('https://tp34kmg4.rcld.app/webhook/card_edit', postData);
       
       toast({
         title: "Success!",
