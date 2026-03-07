@@ -63,7 +63,7 @@ export default function SignupPage() {
     setIsLoading(true);
     try {
       const { confirmPassword, ...postData } = data;
-      const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/signup', postData);
+      const response = await axios.post('https://tp34kmg4.rcld.app/webhook/signup', postData);
       toast({
         description: response.data?.message || JSON.stringify(response.data, null, 2),
       });
@@ -83,7 +83,7 @@ export default function SignupPage() {
   async function onVerificationSubmit(data: VerificationFormData) {
     setIsLoading(true);
     try {
-        const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/verify-email', {
+        const response = await axios.post('https://tp34kmg4.rcld.app/webhook/verify-email', {
             email: userEmail,
             code: data.code,
         });

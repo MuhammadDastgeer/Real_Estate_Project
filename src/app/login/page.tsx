@@ -42,7 +42,7 @@ export default function LoginPage() {
   async function onSubmit(data: FormData) {
     setIsLoading(true);
     try {
-      const response = await axios.post('https://tp34kmg4.rcld.app/webhook-test/login', data);
+      const response = await axios.post('https://tp34kmg4.rcld.app/webhook/login', data);
       toast({
         description: response.data?.message || "Login successful!",
       });
